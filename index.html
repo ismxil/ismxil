@@ -4,151 +4,1031 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Ismail Ahmad - Business & Design</title>
-    <!-- Tailwind CSS 3 CDN -->
+    <title>Ismail Ahmad — Portfolio 2026</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://mcp.figma.com/mcp/html-to-design/capture.js" async></script>
 
-    <link rel="stylesheet" href="style.css">
-    <script src="tailwind.config.js"></script>
+    <!-- Three.js + GSAP for 3D logo -->
+    <script type="importmap">
+    { "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/" } }
+    </script>
+    <script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+    <style>
+        @font-face {
+            font-family: 'Reckless';
+            src: url('assets/Reckless-SemiBold.otf') format('opentype');
+            font-weight: 600;
+        }
+        @font-face {
+            font-family: 'Marund';
+            src: url('assets/Marund-7022Curved.otf') format('opentype');
+            font-weight: normal;
+        }
+
+        *, *::before, *::after { box-sizing: border-box; }
+        html { background: #fff; overflow: hidden; }
+
+        body {
+            background: #ffffff;
+            color: #111111;
+            margin: 0; padding: 0;
+            overflow: hidden;
+            font-family: 'Marund', sans-serif;
+        }
+
+        main { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
+        .gallery-section { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
+
+        /* ════════════════════════════════
+           Welcome overlay
+           ════════════════════════════════ */
+        #welcome {
+            position: fixed;
+            inset: 0;
+            z-index: 200;
+            background: #ffffff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+        #welcome.phase-exit  {
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.9s ease;
+        }
+
+        /* Three.js canvas inside welcome */
+        #logo-c {
+            position: absolute;
+            inset: 0;
+            width: 100% !important;
+            height: 100% !important;
+            display: block;
+        }
+
+        /* Welcome text UI */
+        #welcome-ui {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(24px);
+            transition: opacity 0.9s ease, transform 0.9s ease;
+            pointer-events: none;
+        }
+        #welcome-ui.visible {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        #welcome-ui h1 {
+            font-family: 'Marund', sans-serif;
+            color: #0011FF;
+            font-size: clamp(44px, 7.8vw, 112px);
+            line-height: 0.88;
+            letter-spacing: -0.01em;
+            margin: 0 0 28px;
+        }
+        #welcome-socials {
+            font-family: 'Reckless', sans-serif;
+            font-size: 14px;
+            color: #111;
+            margin: 0 0 36px;
+            letter-spacing: 0.01em;
+        }
+        #welcome-socials a {
+            color: #111;
+            text-decoration: none;
+        }
+        #welcome-socials a:hover { text-decoration: underline; }
+        #enter-sound {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            background: #111;
+            color: #fff;
+            font-family: 'Reckless', sans-serif;
+            font-size: 14px;
+            border: none;
+            border-radius: 4px;
+            padding: 12px 24px;
+            cursor: pointer;
+            letter-spacing: 0.02em;
+            transition: background 0.2s;
+            margin-bottom: 16px;
+        }
+        #enter-sound:hover { background: #000; }
+        #enter-silent {
+            display: block;
+            font-family: 'Reckless', sans-serif;
+            font-size: 13px;
+            color: #666;
+            background: none;
+            border: none;
+            cursor: pointer;
+            text-decoration: underline;
+            text-underline-offset: 3px;
+            margin: 0 auto;
+            padding: 4px 0;
+        }
+        #enter-silent:hover { color: #111; }
+
+        /* ════════════════════════════════
+           Bottom social + play bar
+           ════════════════════════════════ */
+        #bottom-bar {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            z-index: 45;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            white-space: nowrap;
+        }
+        .social-pill {
+            font-family: 'Reckless', sans-serif;
+            font-size: 13px;
+            color: #111;
+            border: 1.5px solid #bbb;
+            border-radius: 99px;
+            padding: 6px 16px;
+            text-decoration: none;
+            background: rgba(255,255,255,0.85);
+            backdrop-filter: blur(6px);
+            transition: border-color 0.18s, background 0.18s;
+            letter-spacing: 0.01em;
+        }
+        .social-pill:hover { border-color: #111; background: #fff; }
+        #play-btn {
+            width: 38px; height: 38px;
+            border-radius: 50%;
+            background: #0011FF;
+            border: none;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
+            flex-shrink: 0;
+            transition: background 0.18s;
+        }
+        #play-btn:hover { background: #0022ee; }
+        #play-btn svg { display: block; }
+        /* Hidden YouTube frame — needs real size for playback */
+        #yt-wrap {
+            position: fixed; left: -400px; top: -200px;
+            width: 320px; height: 180px;
+            pointer-events: none; opacity: 0; z-index: -1;
+        }
+
+        /* ════════════════════════════════
+           Contact panel
+           ════════════════════════════════ */
+        #contact-panel {
+            position: fixed; top: 0; right: 0;
+            width: 260px; min-height: 100vh;
+            background: #0011FF; color: #ffffff;
+            padding: 18px 22px 32px; z-index: 50;
+            transform: translateX(100%);
+            transition: transform 0.38s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        #contact-panel.is-open { transform: translateX(0); }
+        #contact-panel a:hover, #contact-panel button:hover { opacity: 0.7; }
+
+        /* ── Top nav ── */
+        #top-nav a:hover, #top-nav button:hover { text-decoration: underline; }
+
+        /* ── Gallery ── */
+        .gallery-wrap {
+            width: 100vw; overflow-x: auto; overflow-y: hidden;
+            scrollbar-width: none; -ms-overflow-style: none;
+            cursor: grab; -webkit-user-select: none; user-select: none;
+            flex: 1; min-height: 0;
+        }
+        .gallery-wrap::-webkit-scrollbar { display: none; }
+        .gallery-wrap.is-dragging { cursor: grabbing; }
+        .gallery-inner {
+            display: flex; align-items: flex-start;
+            gap: 16px; padding: 56px 40px 0;
+            height: 100%;
+        }
+        .g-item { flex-shrink: 0; overflow: hidden; cursor: pointer; height: 68%; position: relative; }
+        .g-item[data-index="3"] { height: 46%; }
+        .g-item img { display: block; width: 100%; height: 100%; object-fit: cover; pointer-events: none; }
+        .g-item .ph { display: block; width: 100%; height: 100%; background: #e3e3e3; }
+        /* Card hover overlays */
+        .card-num {
+            position: absolute; top: 12px; left: 14px;
+            font-family: 'Reckless', sans-serif; font-size: 11px; letter-spacing: 0.06em;
+            color: rgba(0,0,0,0.55);
+            opacity: 0; transition: opacity 0.22s ease; pointer-events: none;
+        }
+        .card-brief {
+            position: absolute; bottom: 14px; left: 14px; right: 14px;
+            font-family: 'Reckless', sans-serif; font-size: 12px; line-height: 1.45;
+            color: rgba(0,0,0,0.6);
+            opacity: 0; transition: opacity 0.22s ease; pointer-events: none;
+        }
+        .g-item:hover .card-num,
+        .g-item:hover .card-brief { opacity: 1; }
+
+        /* ── Card Modal — bottom sheet ── */
+        #modal-backdrop {
+            position: fixed; inset: 0; z-index: 60;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.28s ease;
+        }
+        #modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
+        #modal-card {
+            background: #ffffff;
+            border-radius: 20px 20px 0 0;
+            width: min(560px, 100vw);
+            height: calc(100vh - 248px);
+            overflow: hidden; display: flex; flex-direction: column;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+            transform: translateY(100%);
+            transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        #modal-backdrop.is-open #modal-card { transform: translateY(0); }
+        #modal-img-area {
+            position: relative; width: 100%; aspect-ratio: 16/9;
+            background: #e0e0e0; flex-shrink: 0; overflow: hidden;
+        }
+        #modal-img-area .ph-modal { width: 100%; height: 100%; display: block; }
+        #modal-counter {
+            position: absolute; top: 14px; left: 16px;
+            font-family: 'Reckless', sans-serif; font-size: 12px;
+            color: #fff; background: rgba(0,0,0,0.35);
+            padding: 3px 8px; border-radius: 20px; letter-spacing: 0.04em;
+        }
+        .modal-arrow {
+            position: absolute; top: 50%; transform: translateY(-50%);
+            width: 36px; height: 36px; border-radius: 50%;
+            border: 1.5px solid rgba(0,0,0,0.15);
+            background: rgba(255,255,255,0.88); backdrop-filter: blur(4px);
+            display: flex; align-items: center; justify-content: center;
+            cursor: pointer; color: #111; transition: background 0.18s; z-index: 2;
+        }
+        .modal-arrow:hover { background: #ffffff; }
+        #modal-prev { left: 14px; }
+        #modal-next { right: 14px; }
+        #modal-close-btn {
+            position: absolute; top: 12px; right: 14px;
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1.5px solid rgba(0,0,0,0.2); background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #111; z-index: 3;
+        }
+        #modal-close-btn:hover { background: #fff; border-color: #000; }
+        #modal-body { padding: 24px 28px 32px; overflow-y: auto; flex: 1; min-height: 0; }
+        #modal-title {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-size: 26px; font-weight: 700;
+            color: #111; margin: 0 0 14px; line-height: 1.2;
+        }
+        .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+        .modal-tag {
+            font-family: 'Reckless', sans-serif; font-size: 12px; color: #333;
+            border: 1px solid #d0d0d0; border-radius: 20px; padding: 4px 12px;
+            text-decoration: none; display: inline-flex; align-items: center;
+        }
+        .modal-tag-link {
+            font-family: 'Reckless', sans-serif; font-size: 12px; color: #fff;
+            background: #111; border: 1px solid #111; border-radius: 20px; padding: 4px 12px;
+            text-decoration: none; display: inline-flex; align-items: center;
+        }
+        .modal-tag-link:hover { background: #333; border-color: #333; }
+        #modal-divider { height: 1px; background: #ebebeb; margin: 0 0 18px; }
+        #modal-desc {
+            font-family: 'Reckless', sans-serif; font-size: 14px;
+            color: #444; line-height: 1.7; margin: 0 0 16px;
+        }
+        #modal-url {
+            font-family: 'Reckless', sans-serif; font-size: 14px;
+            color: #0011FF; text-decoration: underline; text-underline-offset: 3px;
+        }
+        #modal-url:hover { opacity: 0.7; }
+
+        /* ════════════════════════════════
+           Page Modal (About, Blog) — same style as card modal
+           ════════════════════════════════ */
+        #page-backdrop {
+            position: fixed; inset: 0; z-index: 80;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(4px); -webkit-backdrop-filter: blur(4px);
+            display: flex; align-items: flex-end; justify-content: center;
+            opacity: 0; pointer-events: none;
+            transition: opacity 0.28s ease;
+        }
+        #page-backdrop.is-open { opacity: 1; pointer-events: auto; }
+        #page-modal {
+            background: #fff;
+            border-radius: 20px 20px 0 0;
+            width: min(560px, 100vw);
+            height: calc(100vh - 248px);
+            overflow: hidden;
+            display: flex; flex-direction: column;
+            box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
+            transform: translateY(100%);
+            transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+            position: relative;
+        }
+        #page-backdrop.is-open #page-modal { transform: translateY(0); }
+        #page-modal iframe {
+            width: 100%; height: 100%; border: none; flex: 1; min-height: 0;
+        }
+        #page-modal-close {
+            position: absolute; top: 12px; right: 14px; z-index: 5;
+            width: 32px; height: 32px; border-radius: 50%;
+            border: 1.5px solid rgba(0,0,0,0.2);
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(4px);
+            cursor: pointer; display: flex; align-items: center; justify-content: center;
+            color: #111;
+        }
+        #page-modal-close:hover { border-color: #000; background: #fff; }
+    </style>
 </head>
 
-<body
-    class="bg-brand-black text-brand-red font-serif selection:bg-brand-red selection:text-brand-black flex items-center justify-center min-h-screen px-4 overflow-x-hidden align-middle">
+<body>
 
+    <!-- ════════════════════════════════
+         Welcome Overlay
+         ════════════════════════════════ -->
+    <div id="welcome">
+        <canvas id="logo-c"></canvas>
 
+        <div id="welcome-ui">
+            <h1>Ismail Ahmad&#174;<br>PORTFOLIO 2026</h1>
 
-    <main class="max-w-sm mx-auto mt-12">
-        <!-- Title Section -->
-        <div class="text-center mb-8">
-            <div class="flex justify-center items-center">
-                <svg class="w-8 h-8 md:w-12 md:h-12 logo" viewBox="0 0 40 40" fill="none"
-                    xmlns="http://www.w3.org/2000/svg">
-                    <circle cx="19.8924" cy="19.8924" r="18.6475" stroke="currentColor" stroke-width="2.48974" />
-                    <path d="M19.703 1.3706L7.38959 33.6143" stroke="currentColor" stroke-width="2.48974" />
-                    <path d="M18.6145 7.31771L33.1972 32.5316" stroke="currentColor" stroke-width="6.90648" />
-                    <path
-                        d="M14.122 14.4752C6.64759 15.2002 1.24487 17.2957 1.24487 19.7676C1.24487 22.8405 9.59363 25.3316 19.8924 25.3316C30.1911 25.3316 38.5398 22.8405 38.5398 19.7676C38.5398 17.2701 33.0246 15.1569 25.4299 14.4531"
-                        stroke="currentColor" stroke-width="2.48974" />
-                    <path fill-rule="evenodd" clip-rule="evenodd"
-                        d="M20.8605 30.2672L22.5437 30.4788C22.7748 30.5077 22.8643 30.791 22.6966 30.948L21.4593 32.1087L21.7782 33.7749C21.8216 34.0024 21.5816 34.1764 21.3792 34.0649L19.8929 33.2469L18.4066 34.0652C18.2042 34.1766 17.9639 34.0025 18.0076 33.7752L18.3265 32.1089L17.0891 30.948C16.9215 30.7907 17.0112 30.5077 17.2421 30.4788L18.9253 30.2672L19.6464 28.7322C19.7451 28.5221 20.0408 28.5221 20.1395 28.7322L20.8605 30.2672Z"
-                        fill="currentColor" />
-                </svg>
-            </div>
-            <h1 id="hero-text" class="font-display text-[6rem] uppercase leading-[0.8] mt-8 mb-6 md:text-[10rem]">
-                <span class="hero-line" data-text="ISMAIL"></span><br>
-                <span class="hero-line" data-text="AHMAD"></span>
-            </h1>
-            <p class="font-display text-3xl md:text-4xl uppercase opacity-80 mb-6">
-                A decade of experience in designing financial services that actually works.
+            <p id="welcome-socials">
+                <a href="https://instagram.com/ismxilahmad" target="_blank" rel="noopener">Instagram</a>
+                <span style="margin:0 8px">.</span>
+                <a href="https://x.com/ismxilahmad" target="_blank" rel="noopener">X</a>
+                <span style="margin:0 8px">.</span>
+                <a href="https://github.com/ismxil" target="_blank" rel="noopener">Github</a>
+                <span style="margin:0 8px">.</span>
+                <a href="https://linkedin.com/in/ismxil" target="_blank" rel="noopener">LinkedIn</a>
             </p>
+
+            <button id="enter-sound">
+                Enter with sound
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg>
+            </button>
+            <button id="enter-silent">or without</button>
         </div>
+    </div>
 
-        <!-- Navigation Section -->
-        <nav class="w-full max-w-sm">
-            <ul class="space-y-4">
-                <li class="flex items-end justify-between group">
-                    <a href="about.html"
-                        class="uppercase tracking-widest text-lg md:text-2xl font-display transition-all duration-300 group-hover:pl-2">About</a>
-                    <div class="flex-grow border-b border-dotted border-current mx-2 mb-1"></div>
-                    <span class="font-mono text-sm md:text-lg">I</span>
-                </li>
-                <li class="flex items-end justify-between group">
-                    <a href="work.html"
-                        class="uppercase tracking-widest text-lg md:text-2xl font-display transition-all duration-300 group-hover:pl-2">Work</a>
-                    <div class="flex-grow border-b border-dotted border-current mx-2 mb-1"></div>
-                    <span class="font-mono text-sm md:text-lg">II</span>
-                </li>
-                <li class="flex items-end justify-between group">
-                    <a href="expertise.html"
-                        class="uppercase tracking-widest text-lg md:text-2xl font-display transition-all duration-300 group-hover:pl-2">Expertise</a>
-                    <div class="flex-grow border-b border-dotted border-current mx-2 mb-1"></div>
-                    <span class="font-mono text-sm md:text-lg">III</span>
-                </li>
-                <li class="flex items-end justify-between group">
-                    <a href="play.html"
-                        class="uppercase tracking-widest text-lg md:text-2xl font-display transition-all duration-300 group-hover:pl-2">Play</a>
-                    <div class="flex-grow border-b border-dotted border-current mx-2 mb-1"></div>
-                    <span class="font-mono text-sm md:text-lg">IV</span>
-                </li>
-                <li class="flex items-end justify-between group">
-                    <a href="thought.html"
-                        class="uppercase tracking-widest text-lg md:text-2xl font-display transition-all duration-300 group-hover:pl-2">Thought</a>
-                    <div class="flex-grow border-b border-dotted border-current mx-2 mb-1"></div>
-                    <span class="font-mono text-sm md:text-lg">V</span>
-                </li>
-            </ul>
+    <!-- ════════════════════════════════
+         Bottom social + play bar
+         ════════════════════════════════ -->
+    <div id="bottom-bar">
+        <a class="social-pill" href="https://linkedin.com/in/ismxil" target="_blank" rel="noopener">Linkedin</a>
+        <a class="social-pill" href="https://github.com/ismxil" target="_blank" rel="noopener">Github</a>
+        <a class="social-pill" href="https://x.com/ismxilahmad" target="_blank" rel="noopener">X</a>
+        <a class="social-pill" href="https://instagram.com/ismxilahmad" target="_blank" rel="noopener">Instagram</a>
+        <button id="play-btn" aria-label="Play / Pause music">
+            <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>
+            <svg id="icon-pause" width="14" height="14" viewBox="0 0 24 24" fill="white" style="display:none"><rect x="5" y="4" width="4" height="16"/><rect x="15" y="4" width="4" height="16"/></svg>
+        </button>
+    </div>
+
+    <!-- Hidden YouTube player -->
+    <div id="yt-wrap">
+        <div id="yt-player"></div>
+    </div>
+
+    <!-- ════════════════════════════════
+         Contact Panel
+         ════════════════════════════════ -->
+    <aside id="contact-panel" aria-label="Contact">
+        <div style="text-align:right; margin-bottom:24px;">
+            <button id="close-contact" style="font-family:'Marund',sans-serif; font-size:12px; letter-spacing:0.06em; color:#fff; background:none; border:none; cursor:pointer; padding:0;">Close</button>
+        </div>
+        <nav style="font-family:'Marund',sans-serif; font-size:13px; line-height:2.15; text-align:right;">
+            <a href="mailto:work@ismailahmad.com" style="display:block; color:#fff; text-decoration:none;">work@ismailahmad.com</a>
+            <a href="https://linkedin.com/in/ismxil" target="_blank" rel="noopener" style="display:block; color:#fff; text-decoration:none;">LinkedIn</a>
+            <a href="https://x.com/ismxilahmad" target="_blank" rel="noopener" style="display:block; color:#fff; text-decoration:none;">X / Twitter</a>
+            <a href="https://instagram.com/ismxilahmad" target="_blank" rel="noopener" style="display:block; color:#fff; text-decoration:none;">Instagram</a>
+            <a href="https://github.com/ismxil" target="_blank" rel="noopener" style="display:block; color:#fff; text-decoration:none;">Github</a>
         </nav>
+        <div style="display:flex; align-items:center; gap:14px; margin-top:36px;">
+            <img src="assets/ism.JPG" alt="Ismail Ahmad" style="width:50px; height:50px; border-radius:50%; object-fit:cover; object-position:top; flex-shrink:0;">
+            <p style="font-family:'Reckless',sans-serif; font-size:17px; line-height:1.25; color:#fff; margin:0;">Let's grab a<br>virtual coffee?</p>
+        </div>
+    </aside>
 
-        <!-- Social Links -->
-        <div class="text-center mt-12">
-            <div class="font-display text-12xl md:text-4xl font-black uppercase tracking-normal leading-none mb-2">
-                <div class="flex justify-center gap-4 md:gap-6 mt-6">
-                    <!-- LinkedIn -->
-                    <a href="https://linkedin.com/in/ismxil" target="_blank"
-                        class="hover:scale-110 transition-transform duration-200" aria-label="LinkedIn">
-                        <svg class="w-8 h-8 md:w-8 md:h-8" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
-                            <path fill="currentColor"
-                                d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037c-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85c3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.06 2.06 0 0 1-2.063-2.065a2.064 2.064 0 1 1 2.063 2.065m1.782 13.019H3.555V9h3.564zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0z" />
-                        </svg>
-                    </a>
-                    <!-- Behance -->
-                    <a href="https://www.behance.net/ismxil" target="_blank"
-                        class="hover:scale-110 transition-transform duration-200" aria-label="Behance">
-                        <svg class="w-8 h-8 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M22 7h-7V5h7v2zm1.726 10c-.442 1.297-2.029 3-5.101 3-3.074 0-5.564-1.729-5.564-5.675 0-3.91 2.325-5.92 5.466-5.92 3.082 0 4.964 1.782 5.375 4.426.078.506.109 1.188.095 2.14H15.97c.13 3.211 3.483 3.312 4.588 2.029h3.168zm-7.686-4h4.965c-.105-1.547-1.136-2.219-2.477-2.219-1.466 0-2.277.768-2.488 2.219zm-9.574 6.988H0V5.021h6.953c5.476.081 5.58 5.444 2.72 6.906 3.461 1.26 3.577 8.061-3.207 8.061zM3 11h3.584c2.508 0 2.906-3-.312-3H3v3zm3.391 3H3v3.016h3.341c3.055 0 2.868-3.016.05-3.016z" />
-                        </svg>
-                    </a>
-                    <!-- Instagram -->
-                    <a href="https://www.instagram.com/ismxilahmad" target="_blank"
-                        class="hover:scale-110 transition-transform duration-200" aria-label="Instagram">
-                        <svg class="w-8 h-8 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M12 2.163c3.204 0 3.584.012 4.85.07 3.252.148 4.771 1.691 4.919 4.919.058 1.265.069 1.645.069 4.849 0 3.205-.012 3.584-.069 4.849-.149 3.225-1.664 4.771-4.919 4.919-1.266.058-1.644.07-4.85.07-3.204 0-3.584-.012-4.849-.07-3.26-.149-4.771-1.699-4.919-4.92-.058-1.265-.07-1.644-.07-4.849 0-3.204.013-3.583.07-4.849.149-3.227 1.664-4.771 4.919-4.919 1.266-.057 1.645-.069 4.849-.069zM12 0C8.741 0 8.333.014 7.053.072 2.695.272.273 2.69.073 7.052.014 8.333 0 8.741 0 12c0 3.259.014 3.668.072 4.948.2 4.358 2.618 6.78 6.98 6.98C8.333 23.986 8.741 24 12 24c3.259 0 3.668-.014 4.948-.072 4.354-.2 6.782-2.618 6.979-6.98.059-1.28.073-1.689.073-4.948 0-3.259-.014-3.667-.072-4.947-.196-4.354-2.617-6.78-6.979-6.98C15.668.014 15.259 0 12 0zm0 5.838a6.162 6.162 0 100 12.324 6.162 6.162 0 000-12.324zM12 16a4 4 0 110-8 4 4 0 010 8zm6.406-11.845a1.44 1.44 0 100 2.881 1.44 1.44 0 000-2.881z" />
-                        </svg>
-                    </a>
-                    <!-- X -->
-                    <a href="https://www.x.com/ismxilahmad" target="_blank"
-                        class="hover:scale-110 transition-transform duration-200" aria-label="X">
-                        <svg class="w-8 h-8 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
-                            <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
-                        </svg>
-                    </a>
-                    <!-- GitHub -->
-                    <a href="https://github.com/ismxil" target="_blank"
-                        class="hover:scale-110 transition-transform duration-200" aria-label="GitHub">
-                        <svg class="w-8 h-8 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M12 .297c-6.63 0-12 5.373-12 12c0 5.303 3.438 9.8 8.205 11.385c.6.113.82-.258.82-.577c0-.285-.01-1.04-.015-2.04c-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729c1.205.084 1.838 1.236 1.838 1.236c1.07 1.835 2.809 1.305 3.495.998c.108-.776.417-1.305.76-1.605c-2.665-.3-5.466-1.332-5.466-5.93c0-1.31.465-2.38 1.235-3.22c-.135-.303-.54-1.523.105-3.176c0 0 1.005-.322 3.3 1.23c.96-.267 1.98-.399 3-.405c1.02.006 2.04.138 3 .405c2.28-1.552 3.285-1.23 3.285-1.23c.645 1.653.24 2.873.12 3.176c.765.84 1.23 1.91 1.23 3.22c0 4.61-2.805 5.625-5.475 5.92c.42.36.81 1.096.81 2.22c0 1.606-.015 2.896-.015 3.286c0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12" />
-                        </svg>
-                    </a>
-                    <!-- Email -->
-                    <a href="mailto:work@ismailahmad.com"
-                        class="hover:scale-110 transition-transform duration-200" aria-label="Email">
-                        <svg class="w-8 h-8 md:w-8 md:h-8" fill="currentColor" viewBox="0 0 24 24">
-                            <path
-                                d="M20 4H4c-1.1 0-2 .9-2 2v12c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 4l-8 5-8-5V6l8 5 8-5v2z" />
-                        </svg>
-                    </a>
+    <!-- ════════════════════════════════
+         Top Navigation
+         ════════════════════════════════ -->
+    <header id="top-nav" style="position:fixed; top:0; left:0; right:0; z-index:40; padding:18px 28px; background:rgba(255,255,255,0.96); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:space-between;">
+        <nav style="font-family:'Marund',sans-serif; font-size:13px; color:#111111;">
+            <a href="index.html" style="color:#111111; text-decoration:none; font-weight:600;">Index</a><span style="color:#888;">,</span>
+            <a href="about.html" data-page style="color:#888; text-decoration:none; margin-left:6px;">About</a><span style="color:#888;">,</span>
+            <a href="thought.html" data-page style="color:#888; text-decoration:none; margin-left:6px;">Blog</a>
+        </nav>
+        <button id="open-contact" style="font-family:'Marund',sans-serif; font-size:13px; color:#111111; background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;">Contact <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></button>
+    </header>
+
+    <!-- ════════════════════════════════
+         Main Content
+         ════════════════════════════════ -->
+    <main>
+
+        <section style="padding:68px 20px 0; text-align:center; flex-shrink:0;">
+            <h1 style="font-family:'Marund',sans-serif; color:#0011FF; font-size:clamp(50px,8.2vw,118px); line-height:0.88; letter-spacing:-0.01em; margin:0 0 18px;">Ismail Ahmad&#174;<br>PORTFOLIO 2026</h1>
+            <p style="font-family:'Reckless',sans-serif; font-size:clamp(13px,1.1vw,16px); font-weight:700; color:#111; line-height:1.5; margin:0 auto 28px; max-width:360px;">Cross-platform work. International brands.<br>Experiences recognised by the industry's<br>leading design awards.</p>
+        </section>
+
+
+        <section class="gallery-section">
+            <div class="gallery-wrap" id="gallery-wrap">
+                <div class="gallery-inner">
+                    <div class="g-item" data-index="0" style="width:calc((100vw - 144px) / 5); margin-top:32px;"><div class="ph" style="background:#d6d6d6;"></div></div>
+                    <div class="g-item" data-index="1" style="width:calc((100vw - 144px) / 5); margin-top:8px;"><div class="ph" style="background:#c8c8c8;"></div></div>
+                    <div class="g-item" data-index="2" style="width:calc((100vw - 144px) / 5); margin-top:0;"><div class="ph" style="background:#d8d8d8;"></div></div>
+                    <div class="g-item" data-index="3" style="width:calc((100vw - 144px) / 5); margin-top:100px;"><div class="ph" style="background:#c4c4c4;"></div></div>
+                    <div class="g-item" data-index="4" style="width:calc((100vw - 144px) / 5); margin-top:16px;"><div class="ph" style="background:#cbcbcb;"></div></div>
+                    <div class="g-item" data-index="5" style="width:calc((100vw - 144px) / 5); margin-top:24px;"><div class="ph" style="background:#d2d2d2;"></div></div>
                 </div>
             </div>
-        </div>
-        <!-- Footer Info -->
-        <footer class="my-16 opacity-80 text-center">
-            <p class="text-xs text-center font-mono uppercase tracking-widest mb-2">(c) 2026</p>
-            <div class="flex justify-center items-center mt-4">
-                <a href="#" id="color-randomizer" class="hover:scale-110 transition-transform duration-200"
-                    aria-label="Randomize Colors">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24">
-                        <path fill="currentColor"
-                            d="M15.98 1.804a1 1 0 0 0-1.96 0l-.24 1.192a1 1 0 0 1-.784.785l-1.192.238a1 1 0 0 0 0 1.962l1.192.238a1 1 0 0 1 .785.785l.238 1.192a1 1 0 0 0 1.962 0l.238-1.192a1 1 0 0 1 .785-.785l1.192-.238a1 1 0 0 0 0-1.962l-1.192-.238a1 1 0 0 1-.785-.785zm-9.031 3.88a1 1 0 0 0-1.898 0l-.683 2.051a1 1 0 0 1-.633.633l-2.051.683a1 1 0 0 0 0 1.898l2.051.684a1 1 0 0 1 .633.632l.683 2.051a1 1 0 0 0 1.898 0l.683-2.051a1 1 0 0 1 .633-.633l2.051-.683a1 1 0 0 0 0-1.898l-2.051-.683a1 1 0 0 1-.633-.633zm7 8a1 1 0 0 0-1.898 0l-.184.551a1 1 0 0 1-.632.633l-.551.183a1 1 0 0 0 0 1.898l.551.183a1 1 0 0 1 .633.633l.183.551a1 1 0 0 0 1.898 0l.184-.551a1 1 0 0 1 .632-.633l.551-.183a1 1 0 0 0 0-1.898l-.551-.184a1 1 0 0 1-.633-.632z" />
-                    </svg>
-                </a>
-            </div>
-        </footer>
+        </section>
+
+        <div style="flex-shrink:0; height:72px;"></div>
+
     </main>
 
-    <script src="script.js"></script>
-    <script src="blog-cache.js"></script>
-    <script>BlogCache.getArticles(function () { });</script>
-</body>
+    <!-- ════════════════════════════════
+         Card Modal
+         ════════════════════════════════ -->
+    <div id="modal-backdrop">
+        <div id="modal-card">
+            <div id="modal-img-area">
+                <div id="modal-img-placeholder" class="ph-modal"></div>
+                <span id="modal-counter">1 / 6</span>
+                <button class="modal-arrow" id="modal-prev" aria-label="Previous"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+                <button class="modal-arrow" id="modal-next" aria-label="Next"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18l6-6-6-6"/></svg></button>
+                <button id="modal-close-btn" aria-label="Close"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg></button>
+            </div>
+            <div id="modal-body">
+                <h2 id="modal-title"></h2>
+                <div class="modal-tags" id="modal-tags"></div>
+                <div id="modal-divider"></div>
+                <p id="modal-desc"></p>
+                <a id="modal-url" href="#" target="_blank" rel="noopener" style="display:none;"></a>
+            </div>
+        </div>
+    </div>
 
+    <!-- ════════════════════════════════
+         Page Modal (About, Blog, Work…)
+         ════════════════════════════════ -->
+    <div id="page-backdrop">
+        <div id="page-modal">
+            <iframe id="page-iframe" src="" frameborder="0"></iframe>
+            <button id="page-modal-close" aria-label="Close">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M18 6L6 18M6 6l12 12"/></svg>
+            </button>
+        </div>
+    </div>
+
+    <!-- ════════════════════════════════
+         3D Logo — Three.js module
+         ════════════════════════════════ -->
+    <script type="module">
+        import * as THREE from 'three';
+        import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+        if (!window._skipWelcome) {
+
+        const canvas   = document.getElementById('logo-c');
+        const overlay  = document.getElementById('welcome');
+
+        const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        renderer.setClearColor(0x000000, 0);   // transparent clear
+        renderer.toneMapping = THREE.ACESFilmicToneMapping;
+        renderer.toneMappingExposure = 1.5;
+        renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+        const scene  = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 500);
+        camera.position.z = 150;
+
+        const pmrem = new THREE.PMREMGenerator(renderer);
+        scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+        pmrem.dispose();
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1.1));
+        const keyLight = new THREE.DirectionalLight(0xffffff, 3.5);
+        keyLight.position.set(-28, 38, 30); scene.add(keyLight);
+        const fillLight = new THREE.DirectionalLight(0xff88cc, 2.0);   // pink fill
+        fillLight.position.set(28, -18, 22); scene.add(fillLight);
+        const rimLight = new THREE.DirectionalLight(0x8899ff, 2.0);    // blue rim
+        rimLight.position.set(0, 6, -45); scene.add(rimLight);
+
+        // Holographic iridescent material — pink-purple-blue shift
+        const mat = new THREE.MeshPhysicalMaterial({
+            color: 0xffffff,
+            metalness: 0.05,
+            roughness: 0.22,
+            iridescence: 1.0,
+            iridescenceIOR: 2.0,
+            iridescenceThicknessRange: [100, 600],
+            envMapIntensity: 2.5,
+            clearcoat: 0.6,
+            clearcoatRoughness: 0.15,
+        });
+
+        const pivot = new THREE.Group(); scene.add(pivot);
+        const group = new THREE.Group(); pivot.add(group);
+
+        const CX = 19.8924, CY = 19.8924, DEPTH = 3.5;
+        const BEVEL = { depth: DEPTH, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.35, bevelSegments: 4 };
+
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(18.6475, 2.48974/2, 24, 120), mat);
+        ring.position.z = DEPTH/2; group.add(ring);
+
+        const thinLine = (() => {
+            const r = 2.48974/2;
+            const a = new THREE.Vector3(19.703-CX, -(1.3706-CY), 0);
+            const b = new THREE.Vector3(7.38959-CX, -(33.6143-CY), 0);
+            const dir = b.clone().sub(a);
+            const mid = a.clone().lerp(b, 0.5);
+            const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 20), mat);
+            m.position.set(mid.x, mid.y, DEPTH/2);
+            m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.normalize());
+            group.add(m); return m;
+        })();
+
+        const thickLine = (() => {
+            const r = 6.90648/2;
+            const a = new THREE.Vector3(18.6145-CX, -(7.31771-CY), 0);
+            const b = new THREE.Vector3(33.1972-CX, -(32.5316-CY), 0);
+            const dir = b.clone().sub(a);
+            const mid = a.clone().lerp(b, 0.5);
+            const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 20), mat);
+            m.position.set(mid.x, mid.y, DEPTH/2);
+            m.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0), dir.normalize());
+            group.add(m); return m;
+        })();
+
+        const orbit = (() => {
+            const rx = (38.5398-1.24487)/2, ry = (25.3316-14.4531)/2;
+            class EllipseCurve extends THREE.Curve {
+                getPoint(t, out) {
+                    const v = out || new THREE.Vector3();
+                    return v.set(rx*Math.cos(t*Math.PI*2), ry*Math.sin(t*Math.PI*2), 0);
+                }
+            }
+            const m = new THREE.Mesh(new THREE.TubeGeometry(new EllipseCurve(), 120, 2.48974/2, 16, true), mat);
+            m.position.z = DEPTH/2; group.add(m); return m;
+        })();
+
+        const star = (() => {
+            const pts = [[20.8605,30.2672],[22.5437,30.4788],[21.4593,32.1087],[21.7782,33.7749],[19.8929,33.2469],[18.4066,34.0652],[18.0076,33.7752],[18.3265,32.1089],[17.0891,30.948],[17.2421,30.4788],[18.9253,30.2672],[19.6464,28.7322],[20.1395,28.7322]];
+            const shape = new THREE.Shape(pts.map(([x,y]) => new THREE.Vector2(x-CX, -(y-CY))));
+            const m = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, BEVEL), mat);
+            group.add(m); return m;
+        })();
+
+        const pieces = [ring, thinLine, thickLine, orbit, star];
+        const piecesFinalPos = pieces.map(m => m.position.clone());
+
+        // ── Intro: assembly animation ──
+        const thickFinalY = piecesFinalPos[2].y;
+        const thinFinalX  = piecesFinalPos[1].x;
+        const starFinalZ  = piecesFinalPos[4].z;
+
+        ring.scale.setScalar(0.01); ring.rotation.z = Math.PI*1.5;
+        thickLine.scale.setScalar(0.01); thickLine.position.y = thickFinalY+28;
+        thinLine.scale.setScalar(0.01);  thinLine.position.x = thinFinalX-22;
+        orbit.scale.set(0.01, 0.01, 1);
+        star.scale.setScalar(0.01); star.rotation.z = Math.PI*1.2; star.position.z = starFinalZ-8;
+
+        gsap.to(camera.position, { z: 90, duration: 2.6, ease: 'power3.out', delay: 0.15 });
+
+        const intro = gsap.timeline({ delay: 0.15 });
+        intro.to(ring.scale,    { x:1, y:1, z:1, duration:0.85, ease:'elastic.out(1,0.5)' }, 0.10)
+             .to(ring.rotation, { z:0,           duration:0.75, ease:'power3.out'          }, 0.12);
+        intro.to(thickLine.position, { y: thickFinalY, duration:0.60, ease:'power4.out'    }, 0.38)
+             .to(thickLine.scale,    { x:1, y:1, z:1,  duration:0.55, ease:'back.out(1.4)' }, 0.35);
+        intro.to(thinLine.position, { x: thinFinalX,  duration:0.52, ease:'power3.out'    }, 0.58)
+             .to(thinLine.scale,    { x:1, y:1, z:1,  duration:0.50, ease:'back.out(2)'   }, 0.56);
+        intro.to(orbit.scale, { x:1, y:1, duration:0.75, ease:'elastic.out(1,0.45)' }, 0.75);
+        intro.to(star.scale,    { x:1, y:1, z:1, duration:0.50, ease:'back.out(3)'   }, 0.95)
+             .to(star.rotation, { z:0,            duration:0.45, ease:'power3.out'    }, 0.95)
+             .to(star.position, { z:starFinalZ,   duration:0.40, ease:'power4.out'    }, 0.97);
+
+        // ── After intro: fade logo to ghost, reveal welcome UI ──
+        intro.call(() => {
+            // Reduce logo to subtle ghost on white
+            gsap.to(mat, {
+                opacity: 0.32, duration: 1.3, ease: 'power2.out',
+                onStart: () => { mat.transparent = true; },
+            });
+            gsap.to(keyLight,  { intensity: 1.4, duration: 1.3 });
+            gsap.to(fillLight, { intensity: 0.9, duration: 1.3 });
+            gsap.to(rimLight,  { intensity: 0.7, duration: 1.3 });
+            gsap.to(camera.position, { z: 110, duration: 1.4, ease: 'power2.out' });
+
+            setTimeout(() => {
+                document.getElementById('welcome-ui').classList.add('visible');
+            }, 600);
+        }, [], 1.55);
+
+        // ── Continuous float + rotation (same as logo-3d.html) ──
+        const LOOP_DELAY = 1.85;
+        gsap.to(group.position, { y: 4.5, duration: 2.9, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: LOOP_DELAY });
+        gsap.to(group.rotation, { y: `+=${Math.PI*2}`, duration: 11, repeat: -1, ease: 'none', delay: LOOP_DELAY });
+        gsap.to(group.rotation, { x: 0.22, duration: 4.8, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: LOOP_DELAY });
+
+        // ── Mouse parallax ──
+        let mX = 0, mY = 0;
+        window.addEventListener('mousemove', (e) => {
+            mY = (e.clientX / window.innerWidth  - 0.5) *  0.35;
+            mX = (e.clientY / window.innerHeight - 0.5) * -0.25;
+        });
+
+        // ── Resize ──
+        window.addEventListener('resize', () => {
+            const w = window.innerWidth, h = window.innerHeight;
+            camera.aspect = w/h; camera.updateProjectionMatrix();
+            renderer.setSize(w, h);
+        });
+
+        // ── Expose exit function for the welcome buttons ──
+        window._logoExitAnimation = function() {
+            gsap.to(group.scale,   { x: 5, y: 5, z: 5, duration: 1.1, ease: 'power3.in' });
+            gsap.to(mat,           { opacity: 0, duration: 0.8, ease: 'power2.in' });
+            gsap.to(camera.position, { z: 60, duration: 1.0, ease: 'power3.in' });
+        };
+
+        // ── Render loop ──
+        (function animate() {
+            requestAnimationFrame(animate);
+            pivot.rotation.x += (mX - pivot.rotation.x) * 0.045;
+            pivot.rotation.y += (mY - pivot.rotation.y) * 0.045;
+            renderer.render(scene, camera);
+        })();
+
+        } // end if (!window._skipWelcome)
+    </script>
+
+    <!-- ════════════════════════════════
+         Welcome interactions + portfolio JS
+         ════════════════════════════════ -->
+    <script>
+        // ── Show welcome only once per session ──
+        window._skipWelcome = !!sessionStorage.getItem('pv');
+        if (window._skipWelcome) {
+            var _wEl = document.getElementById('welcome');
+            if (_wEl) _wEl.style.display = 'none';
+        }
+
+        // ────────────────────────────────
+        // Alan Watts + beats track IDs
+        // How to find: open youtube.com, play the video, copy the ID after ?v=
+        // e.g. youtube.com/watch?v=XXXXXXXXXXX → ID is 'XXXXXXXXXXX'
+        // ────────────────────────────────
+        var AW_TRACKS = [
+            'YbIMXQZMWdo',   // Alan Watts — The Real You (lofi beats)
+            'qhpCRnZRiXs',   // Alan Watts — Dream (with music)
+            'OPME6RBnVOs',   // Alan Watts — You Are It (ambient)
+        ];
+
+        var ytFrame   = null;
+        var musicOn   = false;
+        var iconPause = document.getElementById('icon-pause');
+        var iconPlay  = document.getElementById('icon-play');
+
+        function updatePlayIcon() {
+            iconPlay.style.display  = musicOn ? 'none'  : 'block';
+            iconPause.style.display = musicOn ? 'block' : 'none';
+        }
+
+        // Direct iframe + postMessage — no external API script needed
+        function startMusic() {
+            var trackId = AW_TRACKS[Math.floor(Math.random() * AW_TRACKS.length)];
+            var iframe = document.createElement('iframe');
+            iframe.width  = '320';
+            iframe.height = '180';
+            iframe.allow  = 'autoplay; encrypted-media';
+            iframe.setAttribute('frameborder', '0');
+            iframe.src = 'https://www.youtube.com/embed/' + trackId +
+                '?autoplay=1&controls=0&loop=1&playlist=' + trackId + '&enablejsapi=1';
+            document.getElementById('yt-player').appendChild(iframe);
+            ytFrame = iframe;
+            musicOn = true;
+            updatePlayIcon();
+        }
+
+        function toggleMusic() {
+            if (!ytFrame) { startMusic(); return; }
+            var cmd = musicOn ? 'pauseVideo' : 'playVideo';
+            ytFrame.contentWindow.postMessage(
+                JSON.stringify({ event: 'command', func: cmd, args: [] }),
+                'https://www.youtube.com'
+            );
+            musicOn = !musicOn;
+            updatePlayIcon();
+        }
+
+        document.getElementById('play-btn').addEventListener('click', toggleMusic);
+
+        // ── Enter with sound ──
+        document.getElementById('enter-sound').addEventListener('click', function () {
+            startMusic();
+            enterPortfolio();
+        });
+
+        // ── Enter without sound ──
+        document.getElementById('enter-silent').addEventListener('click', function () {
+            enterPortfolio();
+        });
+
+        function enterPortfolio() {
+            sessionStorage.setItem('pv', '1');
+            // Fire Three.js exit animation (defined in module script)
+            if (window._logoExitAnimation) window._logoExitAnimation();
+            // Fade welcome UI out
+            var ui = document.getElementById('welcome-ui');
+            ui.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            ui.style.opacity    = '0';
+            ui.style.transform  = 'translateY(-16px)';
+            // Fade overlay out after a beat
+            setTimeout(function () {
+                document.getElementById('welcome').classList.add('phase-exit');
+            }, 500);
+        }
+
+        // ────────────────────────────────
+        // Contact panel
+        // ────────────────────────────────
+        var panel   = document.getElementById('contact-panel');
+        var openBtn = document.getElementById('open-contact');
+
+        openBtn.addEventListener('click', function () { panel.classList.add('is-open'); });
+        document.getElementById('close-contact').addEventListener('click', function () { panel.classList.remove('is-open'); });
+        document.addEventListener('click', function (e) {
+            if (panel.classList.contains('is-open') && !panel.contains(e.target) && e.target !== openBtn)
+                panel.classList.remove('is-open');
+        });
+
+        // ────────────────────────────────
+        // Page modal (About, Blog, Work…)
+        // ────────────────────────────────
+        var pageBackdrop = document.getElementById('page-backdrop');
+        var pageIframe   = document.getElementById('page-iframe');
+
+        function openPageModal(url) {
+            pageIframe.src = url;
+            pageBackdrop.classList.add('is-open');
+            document.body.style.overflow = 'hidden';
+        }
+        function closePageModal() {
+            pageBackdrop.classList.remove('is-open');
+            document.body.style.overflow = '';
+            setTimeout(function () { pageIframe.src = ''; }, 400);
+        }
+
+        document.getElementById('page-modal-close').addEventListener('click', closePageModal);
+        pageBackdrop.addEventListener('click', function (e) {
+            if (e.target === pageBackdrop) closePageModal();
+        });
+
+        // Intercept nav links
+        document.querySelectorAll('a[data-page]').forEach(function (a) {
+            a.addEventListener('click', function (e) {
+                e.preventDefault();
+                openPageModal(this.getAttribute('href'));
+            });
+        });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') closePageModal();
+        });
+
+        // ────────────────────────────────
+        // Card data
+        // ────────────────────────────────
+        var cards = [
+            {
+                title: 'Lemfi debit card feature program',
+                tags: ['Product Design', 'Fintech'],
+                desc: 'Lemfi is a financial technology company offering a range of services like remittance designed for people in the diaspora. I worked on all touchpoints from mobile, to website to portal and communities integration. Raised over $53M Series B round.',
+                brief: 'Diaspora remittance & card experience',
+                url: 'https://lemfi.com/cards',
+                workUrl: 'work.html'
+            },
+            {
+                title: 'Commerzbank mobile banking redesign',
+                tags: ['Mobile App Design', 'Business Banking'],
+                desc: 'A strategic redesign of the mobile onboarding and in-app transaction flows for a leading German bank, focused on enhancing user experience and simplifying digital payments. The redesign led to a significant improvement in user satisfaction and a reduction in transaction errors.',
+                brief: 'Onboarding & transaction flows',
+                url: 'https://commerzbank.com',
+                workUrl: 'work.html'
+            },
+            {
+                title: 'Motel One beOne app — check-in & digital key',
+                tags: ['Mobile App Design', 'Travel & Hospitality'],
+                desc: 'Elevated the Motel One "beOne" app from a simple booking tool into an all-in-one digital companion. Designed a frictionless digital check-in and mobile key feature. Successfully rolled out across 92 hotels. Won the Red Dot Award.',
+                brief: 'Digital check-in & Red Dot Award winner',
+                url: 'https://motel-one.com/check-in',
+                workUrl: 'work.html'
+            },
+            {
+                title: 'Etihad Credit Bureau — portal & website',
+                tags: ['Web & App Design', 'Government Services'],
+                desc: 'Completely redesigned the digital presence of the UAE\'s national credit bureau, unifying UX across the public website, secure user portal, and mobile app. Won Grand Prix, 5 Golds, 2 Silvers, 1 Bronze, and 2 Special Recognitions.',
+                brief: 'UAE national credit data platform',
+                url: 'https://etihadbureau.ae',
+                workUrl: 'work.html'
+            },
+            {
+                title: 'Gomoney — onboarding & brand refresh',
+                tags: ['Mobile App Design', 'Digital Banking'],
+                desc: 'A strategic redesign of the onboarding experience for a leading Nigerian digital bank, aimed at reducing user drop-off and simplifying account upgrades. Increased installs from the website by 18% and improved engagement by 7.5%.',
+                brief: 'Reducing drop-off for Nigerian digital bank',
+                url: 'https://gomoney.global/account',
+                workUrl: 'work.html'
+            },
+            {
+                title: 'Cadana — brand identity',
+                tags: ['Branding', 'Fintech'],
+                desc: 'A bold and unique brand identity for a modern financial services platform trusted by 2,000+ businesses globally. The world\'s largest payroll platforms and talent marketplaces now use Cadana\'s APIs to build compliant hiring products in Africa, Asia, and Latin America.',
+                brief: 'Identity for global payroll infrastructure',
+                url: 'https://cadanapay.com',
+                workUrl: 'work.html'
+            },
+        ];
+        var bgColors = ['#d6d6d6','#c8c8c8','#d8d8d8','#c4c4c4','#cbcbcb','#d2d2d2'];
+
+        // ────────────────────────────────
+        // Modal
+        // ────────────────────────────────
+        var backdrop    = document.getElementById('modal-backdrop');
+        var modalClose  = document.getElementById('modal-close-btn');
+        var modalPrev   = document.getElementById('modal-prev');
+        var modalNext   = document.getElementById('modal-next');
+        var modalCounter = document.getElementById('modal-counter');
+        var modalImgPh  = document.getElementById('modal-img-placeholder');
+        var modalTitle  = document.getElementById('modal-title');
+        var modalTags   = document.getElementById('modal-tags');
+        var modalDesc   = document.getElementById('modal-desc');
+        var modalUrl    = document.getElementById('modal-url');
+        var currentIndex = 0;
+
+        function renderModal(idx) {
+            var card = cards[idx]; currentIndex = idx;
+            modalCounter.textContent    = (idx+1)+' / '+cards.length;
+            modalImgPh.style.background = bgColors[idx];
+            modalTitle.textContent      = card.title;
+            modalDesc.textContent       = card.desc;
+            // Tags
+            modalTags.innerHTML = '';
+            card.tags.forEach(function (t) {
+                var s = document.createElement('span');
+                s.className = 'modal-tag'; s.textContent = t;
+                modalTags.appendChild(s);
+            });
+            // "Read full detail" — opens work page in page modal
+            if (card.workUrl) {
+                var a = document.createElement('button');
+                a.className = 'modal-tag-link';
+                a.textContent = 'Read full detail';
+                a.style.cursor = 'pointer';
+                a.addEventListener('click', function () { openPageModal(card.workUrl); });
+                modalTags.appendChild(a);
+            }
+            // URL link
+            if (card.url) {
+                modalUrl.href = card.url;
+                modalUrl.textContent = card.url.replace(/^https?:\/\//, '');
+                modalUrl.style.display = 'inline';
+            } else {
+                modalUrl.style.display = 'none';
+            }
+            modalPrev.style.opacity = idx === 0              ? '0.3' : '1';
+            modalNext.style.opacity = idx === cards.length-1 ? '0.3' : '1';
+        }
+
+        function openModal(idx)  { renderModal(idx); backdrop.classList.add('is-open');    document.body.style.overflow = 'hidden'; }
+        function closeModal()    { backdrop.classList.remove('is-open'); document.body.style.overflow = ''; }
+
+        modalClose.addEventListener('click', closeModal);
+        backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeModal(); });
+        modalPrev.addEventListener('click', function () { if (currentIndex > 0)              renderModal(currentIndex-1); });
+        modalNext.addEventListener('click', function () { if (currentIndex < cards.length-1) renderModal(currentIndex+1); });
+
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape') { closeModal(); panel.classList.remove('is-open'); }
+            if (backdrop.classList.contains('is-open')) {
+                if (e.key === 'ArrowLeft'  && currentIndex > 0)              renderModal(currentIndex-1);
+                if (e.key === 'ArrowRight' && currentIndex < cards.length-1) renderModal(currentIndex+1);
+            }
+        });
+
+        // ────────────────────────────────
+        // Gallery — infinite scroll + hover overlays + click
+        // ────────────────────────────────
+        (function () {
+            var wrap  = document.getElementById('gallery-wrap');
+            var inner = wrap.querySelector('.gallery-inner');
+
+            // 1. Add hover overlays (number + brief) to each original item
+            Array.from(inner.querySelectorAll('.g-item')).forEach(function (item, i) {
+                var num = document.createElement('span');
+                num.className   = 'card-num';
+                num.textContent = String(i + 1).padStart(2, '0');
+                item.appendChild(num);
+
+                var brief = document.createElement('p');
+                brief.className   = 'card-brief';
+                brief.textContent = (cards[i] && cards[i].brief) ? cards[i].brief : '';
+                item.appendChild(brief);
+            });
+
+            // 2. Clone all items for seamless infinite loop
+            Array.from(inner.querySelectorAll('.g-item')).forEach(function (item) {
+                inner.appendChild(item.cloneNode(true));
+            });
+
+            // 3. Measure loop boundary after layout settles
+            var halfWidth = 0;
+            var pos       = 0; // tracked in JS — never let browser clamp it
+            var dragging  = false;
+            var dragMoved = false;
+            var dragStartX, dragStartPos, mouseDownX;
+
+            requestAnimationFrame(function () {
+                requestAnimationFrame(function () {
+                    halfWidth = inner.scrollWidth / 2;
+                    pos = halfWidth; // start mid-loop so both directions work
+                    wrap.scrollLeft = pos;
+                });
+            });
+
+            // Clean positive modulo — always returns a value in [0, halfWidth)
+            function wrapPos(v) {
+                if (halfWidth <= 0) return Math.max(0, v);
+                return ((v % halfWidth) + halfWidth) % halfWidth;
+            }
+
+            // Wheel / trackpad: listen on window so every scroll is captured
+            window.addEventListener('wheel', function (e) {
+                e.preventDefault();
+                pos = wrapPos(pos + e.deltaY + e.deltaX);
+                wrap.scrollLeft = pos;
+            }, { passive: false });
+
+            // 4. Drag interaction
+            wrap.addEventListener('mousedown', function (e) {
+                dragging = true; dragMoved = false;
+                mouseDownX   = e.pageX;
+                dragStartX   = e.pageX;
+                dragStartPos = pos;
+                wrap.classList.add('is-dragging');
+                e.preventDefault();
+            });
+            document.addEventListener('mousemove', function (e) {
+                if (!dragging) return;
+                if (Math.abs(e.pageX - mouseDownX) > 5) dragMoved = true;
+                pos = wrapPos(dragStartPos - (e.pageX - dragStartX));
+                wrap.scrollLeft = pos;
+            });
+            document.addEventListener('mouseup', function () {
+                dragging = false;
+                wrap.classList.remove('is-dragging');
+            });
+
+            // 5. Click (event delegation — works on originals AND clones)
+            wrap.addEventListener('mouseup', function (e) {
+                if (dragMoved) return;
+                var item = e.target.closest('.g-item');
+                if (!item) return;
+                var idx = parseInt(item.getAttribute('data-index'), 10);
+                if (!isNaN(idx)) openModal(idx);
+            });
+
+            // 6. Touch
+            var touchStartX, touchStartPos;
+            wrap.addEventListener('touchstart', function (e) {
+                touchStartX   = e.touches[0].clientX;
+                touchStartPos = pos;
+            }, { passive: true });
+            wrap.addEventListener('touchmove', function (e) {
+                pos = wrapPos(touchStartPos + (touchStartX - e.touches[0].clientX));
+                wrap.scrollLeft = pos;
+            }, { passive: true });
+        })();
+    </script>
+
+</body>
 </html>

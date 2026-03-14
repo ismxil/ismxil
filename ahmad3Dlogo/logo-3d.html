@@ -1,0 +1,580 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cadara Studio</title>
+  <style>
+    *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --dot-rgba:  rgba(51,75,200,0.22);
+      --glow-rgb:  51,75,200;
+      --ui-accent: rgba(51,75,200,0.35);
+    }
+
+    html, body {
+      width: 100%; height: 100%;
+      background-color: #04081a;
+      transition: background-color 0.75s ease;
+      overflow: hidden;
+    }
+
+    /* ── Background atmosphere ──────────────────────────────────── */
+    .bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
+
+    .dots {
+      position: absolute; inset: 0;
+      background-image: radial-gradient(circle, var(--dot-rgba) 1px, transparent 1px);
+      background-size: 34px 34px;
+      mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, black 0%, transparent 80%);
+      -webkit-mask-image: radial-gradient(ellipse 65% 55% at 50% 50%, black 0%, transparent 80%);
+      transition: opacity 0.6s ease;
+    }
+
+    .glow-bg {
+      position: absolute;
+      top: 50%; left: 50%;
+      width: 640px; height: 640px;
+      margin: -320px 0 0 -320px;
+      border-radius: 50%;
+      background: radial-gradient(circle,
+        rgba(var(--glow-rgb), 0.10) 0%,
+        rgba(var(--glow-rgb), 0.04) 50%,
+        transparent 70%);
+      animation: breathe 4s ease-in-out infinite;
+      transition: background 0.75s ease;
+    }
+
+    @keyframes breathe {
+      0%, 100% { transform: scale(1);   opacity: 0.7; }
+      50%       { transform: scale(1.2); opacity: 1;   }
+    }
+
+    /* ── Canvas ─────────────────────────────────────────────────── */
+    canvas {
+      position: fixed; inset: 0; z-index: 1;
+      display: block;
+      width: 100vw !important;
+      height: 100vh !important;
+      cursor: pointer;
+    }
+
+    /* ── Wordmark ───────────────────────────────────────────────── */
+    #wm {
+      position: fixed; bottom: 38px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9.5px; letter-spacing: 0.52em;
+      color: rgba(80,110,220,0.45);
+      text-transform: uppercase;
+      opacity: 0; transition: opacity 1.4s ease, color 0.7s ease;
+      white-space: nowrap; pointer-events: none;
+    }
+
+    /* ── Style name flash ───────────────────────────────────────── */
+    #style-name {
+      position: fixed; top: 30px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 9px; letter-spacing: 0.6em;
+      color: rgba(80,110,220,0.5);
+      text-transform: uppercase;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+    }
+
+    /* ── Click hint ─────────────────────────────────────────────── */
+    #hint {
+      position: fixed; bottom: 62px; left: 50%;
+      transform: translateX(-50%);
+      z-index: 10;
+      font-family: 'Courier New', Courier, monospace;
+      font-size: 8px; letter-spacing: 0.45em;
+      color: rgba(80,110,220,0.3);
+      text-transform: uppercase;
+      opacity: 0; pointer-events: none; white-space: nowrap;
+      transition: opacity 1s ease;
+    }
+
+    /* ── Crosshair corners ──────────────────────────────────────── */
+    .corner {
+      position: fixed; z-index: 10;
+      width: 18px; height: 18px;
+      opacity: 0; transition: opacity 1s ease;
+    }
+    .corner::before, .corner::after {
+      content: ''; position: absolute;
+      background: var(--ui-accent);
+      transition: background 0.7s ease;
+    }
+    .corner::before { width: 1px; height: 100%; }
+    .corner::after  { width: 100%; height: 1px; }
+
+    .corner.tl { top: 28px; left: 28px; }
+    .corner.tl::before { top: 0; left: 0; }
+    .corner.tl::after  { top: 0; left: 0; }
+    .corner.tr { top: 28px; right: 28px; transform: scaleX(-1); }
+    .corner.tr::before { top: 0; left: 0; }
+    .corner.tr::after  { top: 0; left: 0; }
+    .corner.bl { bottom: 28px; left: 28px; transform: scaleY(-1); }
+    .corner.bl::before { top: 0; left: 0; }
+    .corner.bl::after  { top: 0; left: 0; }
+    .corner.br { bottom: 28px; right: 28px; transform: scale(-1); }
+    .corner.br::before { top: 0; left: 0; }
+    .corner.br::after  { top: 0; left: 0; }
+
+    /* ── Click ripple ───────────────────────────────────────────── */
+    .ripple {
+      position: fixed; pointer-events: none;
+      border-radius: 50%; z-index: 100;
+      border: 1px solid rgba(var(--glow-rgb), 0.6);
+      transform: translate(-50%, -50%);
+      animation: ripple-out 0.65s ease-out forwards;
+    }
+    @keyframes ripple-out {
+      from { width: 0;     height: 0;     opacity: 0.9; }
+      to   { width: 140px; height: 140px; opacity: 0;   }
+    }
+
+    /* ── Black intro overlay ────────────────────────────────────── */
+    #overlay {
+      position: fixed; inset: 0; z-index: 50;
+      background: #04081a; pointer-events: none;
+      opacity: 1; transition: opacity 0.85s ease;
+    }
+  </style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="dots"></div>
+  <div class="glow-bg"></div>
+</div>
+
+<canvas id="c"></canvas>
+
+<div id="overlay"></div>
+<div id="style-name"></div>
+<div id="wm">Cadara Studio</div>
+<div id="hint">click to transform</div>
+<div class="corner tl" id="c1"></div>
+<div class="corner tr" id="c2"></div>
+<div class="corner bl" id="c3"></div>
+<div class="corner br" id="c4"></div>
+
+<script type="importmap">
+{
+  "imports": {
+    "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js",
+    "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.160.0/examples/jsm/"
+  }
+}
+</script>
+<script src="https://cdn.jsdelivr.net/npm/gsap@3.12.5/dist/gsap.min.js"></script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+// ── Renderer ─────────────────────────────────────────────────────────
+const canvas = document.getElementById('c');
+const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+renderer.setSize(window.innerWidth, window.innerHeight);
+renderer.toneMapping = THREE.ACESFilmicToneMapping;
+renderer.toneMappingExposure = 1.5;
+renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+// ── Scene & Camera ───────────────────────────────────────────────────
+const scene = new THREE.Scene();
+const camera = new THREE.PerspectiveCamera(40, window.innerWidth / window.innerHeight, 0.1, 500);
+camera.position.z = 150;
+
+// ── Environment ──────────────────────────────────────────────────────
+const pmrem = new THREE.PMREMGenerator(renderer);
+scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+pmrem.dispose();
+
+// ── Lights ───────────────────────────────────────────────────────────
+scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+const keyLight = new THREE.DirectionalLight(0xffffff, 3.2);
+keyLight.position.set(-28, 38, 30);
+scene.add(keyLight);
+
+const fillLight = new THREE.DirectionalLight(0x88aaff, 0.9);
+fillLight.position.set(28, -18, 22);
+scene.add(fillLight);
+
+const rimLight = new THREE.DirectionalLight(0x334BC8, 1.0);
+rimLight.position.set(0, 6, -45);
+scene.add(rimLight);
+
+const innerGlow = new THREE.PointLight(0x4466dd, 0, 80);
+innerGlow.position.set(0, 0, 22);
+scene.add(innerGlow);
+
+// ── Material (MeshPhysicalMaterial for full PBR + iridescence) ────────
+const mat = new THREE.MeshPhysicalMaterial({
+  color: 0x2a3fb8,
+  metalness: 0.82,
+  roughness: 0.08,
+  envMapIntensity: 1.3,
+  iridescence: 0,
+  clearcoat: 0,
+  emissiveIntensity: 0,
+});
+
+// ── Groups ───────────────────────────────────────────────────────────
+const pivot = new THREE.Group();
+scene.add(pivot);
+const group = new THREE.Group();
+pivot.add(group);
+
+// ── SVG coordinate space ──────────────────────────────────────────────
+const CX = 19.8924, CY = 19.8924;
+const DEPTH = 3.5;
+const BEVEL = { depth: DEPTH, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.35, bevelSegments: 4 };
+
+// ── Build meshes ──────────────────────────────────────────────────────
+
+const ring = new THREE.Mesh(new THREE.TorusGeometry(18.6475, 2.48974 / 2, 24, 120), mat);
+ring.position.z = DEPTH / 2;
+group.add(ring);
+
+const thinLine = (() => {
+  const r = 2.48974 / 2;
+  const a = new THREE.Vector3(19.703 - CX, -(1.3706 - CY), 0);
+  const b = new THREE.Vector3(7.38959 - CX, -(33.6143 - CY), 0);
+  const dir = b.clone().sub(a);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 20), mat);
+  m.position.copy(a.clone().lerp(b, 0.5)).z = DEPTH / 2;
+  const mid = a.clone().lerp(b, 0.5);
+  m.position.set(mid.x, mid.y, DEPTH / 2);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+  group.add(m);
+  return m;
+})();
+
+const thickLine = (() => {
+  const r = 6.90648 / 2;
+  const a = new THREE.Vector3(18.6145 - CX, -(7.31771 - CY), 0);
+  const b = new THREE.Vector3(33.1972 - CX, -(32.5316 - CY), 0);
+  const dir = b.clone().sub(a);
+  const mid = a.clone().lerp(b, 0.5);
+  const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 20), mat);
+  m.position.set(mid.x, mid.y, DEPTH / 2);
+  m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+  group.add(m);
+  return m;
+})();
+
+const orbit = (() => {
+  const rx = (38.5398 - 1.24487) / 2;
+  const ry = (25.3316 - 14.4531) / 2;
+  class EllipseCurve extends THREE.Curve {
+    getPoint(t, out) {
+      const v = out || new THREE.Vector3();
+      return v.set(rx * Math.cos(t * Math.PI * 2), ry * Math.sin(t * Math.PI * 2), 0);
+    }
+  }
+  const m = new THREE.Mesh(new THREE.TubeGeometry(new EllipseCurve(), 120, 2.48974 / 2, 16, true), mat);
+  m.position.z = DEPTH / 2;
+  group.add(m);
+  return m;
+})();
+
+const star = (() => {
+  const svgV = [
+    [20.8605,30.2672],[22.5437,30.4788],[21.4593,32.1087],[21.7782,33.7749],
+    [19.8929,33.2469],[18.4066,34.0652],[18.0076,33.7752],[18.3265,32.1089],
+    [17.0891,30.948 ],[17.2421,30.4788],[18.9253,30.2672],[19.6464,28.7322],
+    [20.1395,28.7322],
+  ];
+  const shape = new THREE.Shape(svgV.map(([x, y]) => new THREE.Vector2(x - CX, -(y - CY))));
+  const m = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, BEVEL), mat);
+  group.add(m);
+  return m;
+})();
+
+// ── Store final resting positions (BEFORE intro offsets) ──────────────
+const pieces = [ring, thinLine, thickLine, orbit, star];
+const piecesFinalPos = pieces.map(m => m.position.clone());
+
+// ══════════════════════════════════════════════════════════════════════
+// ── STYLES ────────────────────────────────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+const STYLES = [
+  {
+    name: 'Blueprint',
+    bg: '#04081a',       glowRgb: '51,75,200',
+    dotRgba: 'rgba(51,75,200,0.22)',  uiAccent: 'rgba(51,75,200,0.35)',
+    uiColor: 'rgba(80,110,220,0.45)',
+    matColor: new THREE.Color(0x2a3fb8),
+    metalness: 0.82, roughness: 0.08,
+    iridescence: 0,  clearcoat: 0,
+    emissive: new THREE.Color(0x000000), emissiveIntensity: 0,
+    keyIntensity: 3.2, glowIntensity: 1.8, rimIntensity: 1.0,
+  },
+  {
+    name: 'Holographic',
+    bg: '#c8d8ea',       glowRgb: '90,140,220',
+    dotRgba: 'rgba(80,120,200,0.18)', uiAccent: 'rgba(60,100,180,0.35)',
+    uiColor: 'rgba(40,80,160,0.55)',
+    matColor: new THREE.Color(0xffffff),
+    metalness: 0.04, roughness: 0.02,
+    iridescence: 1.0, clearcoat: 1.0,
+    emissive: new THREE.Color(0x000000), emissiveIntensity: 0,
+    keyIntensity: 2.2, glowIntensity: 0.3, rimIntensity: 0.4,
+  },
+  {
+    name: 'Chrome',
+    bg: '#060606',       glowRgb: '160,165,180',
+    dotRgba: 'rgba(140,145,160,0.14)', uiAccent: 'rgba(180,185,200,0.35)',
+    uiColor: 'rgba(180,185,200,0.5)',
+    matColor: new THREE.Color(0x909090),
+    metalness: 1.0,  roughness: 0.01,
+    iridescence: 0,  clearcoat: 1.0,
+    emissive: new THREE.Color(0x000000), emissiveIntensity: 0,
+    keyIntensity: 4.5, glowIntensity: 0.6, rimIntensity: 1.8,
+  },
+  {
+    name: 'Clay',
+    bg: '#f0ebe2',       glowRgb: '200,155,100',
+    dotRgba: 'rgba(180,130,80,0.18)', uiAccent: 'rgba(150,100,50,0.3)',
+    uiColor: 'rgba(120,75,30,0.5)',
+    matColor: new THREE.Color(0xd0955e),
+    metalness: 0.0,  roughness: 0.92,
+    iridescence: 0,  clearcoat: 0,
+    emissive: new THREE.Color(0x000000), emissiveIntensity: 0,
+    keyIntensity: 2.0, glowIntensity: 0.3, rimIntensity: 0.2,
+  },
+  {
+    name: 'Neon',
+    bg: '#000000',       glowRgb: '0,230,140',
+    dotRgba: 'rgba(0,220,140,0.15)', uiAccent: 'rgba(0,220,140,0.4)',
+    uiColor: 'rgba(0,230,140,0.55)',
+    matColor: new THREE.Color(0x00bb88),
+    metalness: 0.05, roughness: 0.12,
+    iridescence: 0,  clearcoat: 0.5,
+    emissive: new THREE.Color(0x00ff99), emissiveIntensity: 0.72,
+    keyIntensity: 0.8, glowIntensity: 5.5, rimIntensity: 0,
+  },
+  {
+    name: 'Candy',
+    bg: '#0d0320',       glowRgb: '220,50,180',
+    dotRgba: 'rgba(220,50,180,0.2)',  uiAccent: 'rgba(240,60,180,0.4)',
+    uiColor: 'rgba(255,80,190,0.55)',
+    matColor: new THREE.Color(0xff2080),
+    metalness: 0.15, roughness: 0.22,
+    iridescence: 0.45, clearcoat: 0.9,
+    emissive: new THREE.Color(0xff0060), emissiveIntensity: 0.2,
+    keyIntensity: 2.5, glowIntensity: 3.0, rimIntensity: 0.5,
+  },
+];
+
+// ══════════════════════════════════════════════════════════════════════
+// ── INTRO ANIMATION — "Assembly Protocol" ────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+
+// Store final Y / X / Z for intro offset references
+const thickFinalY = piecesFinalPos[2].y;
+const thinFinalX  = piecesFinalPos[1].x;
+const starFinalZ  = piecesFinalPos[4].z;
+
+// Initial states
+ring.scale.setScalar(0.01);
+ring.rotation.z = Math.PI * 1.5;
+
+thickLine.scale.setScalar(0.01);
+thickLine.position.y = thickFinalY + 28;
+
+thinLine.scale.setScalar(0.01);
+thinLine.position.x = thinFinalX - 22;
+
+orbit.scale.set(0.01, 0.01, 1);
+
+star.scale.setScalar(0.01);
+star.rotation.z = Math.PI * 1.2;
+star.position.z = starFinalZ - 8;
+
+// Overlay fade
+setTimeout(() => { document.getElementById('overlay').style.opacity = '0'; }, 120);
+
+// Camera zoom
+gsap.to(camera.position, { z: 90, duration: 2.6, ease: 'power3.out', delay: 0.15 });
+
+const intro = gsap.timeline({ delay: 0.25 });
+
+intro.to(innerGlow, { intensity: 7,   duration: 0.25, ease: 'power3.in'  }, 0.10)
+     .to(innerGlow, { intensity: 1.8, duration: 1.4,  ease: 'power2.out' }, 0.35);
+
+intro.to(ring.scale,    { x: 1, y: 1, z: 1, duration: 0.85, ease: 'elastic.out(1, 0.5)' }, 0.10)
+     .to(ring.rotation, { z: 0,             duration: 0.75, ease: 'power3.out'            }, 0.12);
+
+intro.to(thickLine.position, { y: thickFinalY, duration: 0.60, ease: 'power4.out'    }, 0.38)
+     .to(thickLine.scale,    { x: 1, y: 1, z: 1, duration: 0.55, ease: 'back.out(1.4)' }, 0.35);
+
+intro.to(thinLine.position, { x: thinFinalX, duration: 0.52, ease: 'power3.out'     }, 0.58)
+     .to(thinLine.scale,    { x: 1, y: 1, z: 1, duration: 0.50, ease: 'back.out(2)'  }, 0.56);
+
+intro.to(orbit.scale, { x: 1, y: 1, duration: 0.75, ease: 'elastic.out(1, 0.45)' }, 0.75);
+
+intro.to(star.scale,    { x: 1, y: 1, z: 1, duration: 0.50, ease: 'back.out(3)'   }, 0.95)
+     .to(star.rotation, { z: 0,             duration: 0.45, ease: 'power3.out'     }, 0.95)
+     .to(star.position, { z: starFinalZ,    duration: 0.40, ease: 'power4.out'     }, 0.97);
+
+intro.call(() => {
+  document.getElementById('wm').style.opacity = '1';
+  ['c1','c2','c3','c4'].forEach(id => { document.getElementById(id).style.opacity = '1'; });
+  // Show hint
+  const hint = document.getElementById('hint');
+  hint.style.opacity = '1';
+  setTimeout(() => { hint.style.opacity = '0'; }, 3500);
+}, [], 1.55);
+
+// ══════════════════════════════════════════════════════════════════════
+// ── FINAL STATE — continuous float + rotation ─────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+
+const LOOP_DELAY = 1.85;
+
+gsap.to(group.position, { y: 4.5, duration: 2.9, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: LOOP_DELAY });
+gsap.to(group.rotation, { y: `+=${Math.PI * 2}`, duration: 11, repeat: -1, ease: 'none', delay: LOOP_DELAY });
+gsap.to(group.rotation, { x: 0.22, duration: 4.8, repeat: -1, yoyo: true, ease: 'sine.inOut', delay: LOOP_DELAY });
+
+// ══════════════════════════════════════════════════════════════════════
+// ── CLICK — randomised style switch ──────────────────────────────────
+// ══════════════════════════════════════════════════════════════════════
+
+let currentStyleIdx = 0;
+let isTransitioning = false;
+
+// Explosion vectors (local group space)
+const BURST = [
+  { x:  0,   y:  22, z:  8 }, // ring
+  { x: -16,  y:   9, z:  5 }, // thinLine
+  { x:  14,  y: -12, z:  7 }, // thickLine
+  { x:  0,   y: -18, z:  5 }, // orbit
+  { x:  6,   y:   9, z: 14 }, // star
+];
+
+function applyTheme(s) {
+  // Material — instant swap (pieces at scale 0, so invisible)
+  mat.color.copy(s.matColor);
+  mat.metalness        = s.metalness;
+  mat.roughness        = s.roughness;
+  mat.iridescence      = s.iridescence;
+  mat.clearcoat        = s.clearcoat;
+  mat.emissive.copy(s.emissive);
+  mat.emissiveIntensity = s.emissiveIntensity;
+  mat.needsUpdate      = true;
+
+  // Lights
+  rimLight.intensity = s.rimIntensity;
+  gsap.to(keyLight, { intensity: s.keyIntensity, duration: 0.6 });
+
+  // CSS theme vars
+  document.body.style.backgroundColor = s.bg;
+  const root = document.documentElement.style;
+  root.setProperty('--glow-rgb',  s.glowRgb);
+  root.setProperty('--dot-rgba',  s.dotRgba);
+  root.setProperty('--ui-accent', s.uiAccent);
+
+  // UI text colours
+  document.getElementById('wm').style.color        = s.uiColor;
+  document.getElementById('style-name').style.color = s.uiColor;
+  document.getElementById('hint').style.color       = s.uiColor.replace('0.55','0.30').replace('0.45','0.28').replace('0.5','0.28');
+}
+
+function switchStyle(e) {
+  if (isTransitioning) return;
+  isTransitioning = true;
+
+  // Ripple at click point
+  const rip = document.createElement('div');
+  rip.className = 'ripple';
+  rip.style.left = e.clientX + 'px';
+  rip.style.top  = e.clientY + 'px';
+  document.body.appendChild(rip);
+  setTimeout(() => rip.remove(), 700);
+
+  // Hide hint permanently after first click
+  document.getElementById('hint').style.opacity = '0';
+
+  // Pick a random different style
+  let next;
+  do { next = Math.floor(Math.random() * STYLES.length); } while (next === currentStyleIdx);
+  currentStyleIdx = next;
+  const s = STYLES[next];
+
+  // Kill any leftover tweens on pieces
+  pieces.forEach(p => gsap.killTweensOf([p.position, p.scale]));
+
+  const tl = gsap.timeline({ onComplete: () => { isTransitioning = false; } });
+
+  // ── 1. Light burst ──────────────────────────────────────────────
+  tl.to(innerGlow, { intensity: 9,             duration: 0.18, ease: 'power3.in'  }, 0)
+    .to(innerGlow, { intensity: s.glowIntensity, duration: 1.1, ease: 'power2.out' }, 0.18);
+
+  // ── 2. Pieces explode outward (staggered) ───────────────────────
+  pieces.forEach((p, i) => {
+    const fp = piecesFinalPos[i];
+    const b  = BURST[i];
+    const t  = i * 0.04;
+    tl.to(p.position, { x: fp.x + b.x, y: fp.y + b.y, z: fp.z + b.z, duration: 0.26, ease: 'power3.out' }, t);
+    tl.to(p.scale,    { x: 0.01, y: 0.01, z: 0.01,                    duration: 0.22, ease: 'power2.in'  }, t + 0.04);
+  });
+
+  // ── 3. Instant material + theme swap (all pieces at scale ~0) ───
+  tl.call(() => applyTheme(s), [], 0.38);
+
+  // Style name flash
+  tl.call(() => {
+    const el = document.getElementById('style-name');
+    el.textContent = s.name.toUpperCase();
+    gsap.fromTo(el, { opacity: 0, y: 10 }, { opacity: 1, y: 0, duration: 0.35, ease: 'power2.out',
+      onComplete: () => setTimeout(() => gsap.to(el, { opacity: 0, duration: 0.55 }), 1200)
+    });
+  }, [], 0.40);
+
+  // ── 4. Pieces reassemble into final positions ───────────────────
+  pieces.forEach((p, i) => {
+    const fp = piecesFinalPos[i];
+    const t  = 0.44 + i * 0.07;
+    tl.to(p.scale,    { x: 1, y: 1, z: 1, duration: 0.60, ease: 'elastic.out(1, 0.52)' }, t);
+    tl.to(p.position, { x: fp.x, y: fp.y, z: fp.z,        duration: 0.54, ease: 'back.out(1.5)' }, t + 0.02);
+  });
+
+  return tl;
+}
+
+canvas.addEventListener('click', switchStyle);
+
+// ── Mouse parallax ────────────────────────────────────────────────────
+let mouseTargetX = 0, mouseTargetY = 0;
+window.addEventListener('mousemove', (e) => {
+  mouseTargetY = (e.clientX / window.innerWidth  - 0.5) *  0.35;
+  mouseTargetX = (e.clientY / window.innerHeight - 0.5) * -0.25;
+});
+
+// ── Resize ────────────────────────────────────────────────────────────
+window.addEventListener('resize', () => {
+  const w = window.innerWidth, h = window.innerHeight;
+  camera.aspect = w / h;
+  camera.updateProjectionMatrix();
+  renderer.setSize(w, h);
+});
+
+// ── Render loop ───────────────────────────────────────────────────────
+(function animate() {
+  requestAnimationFrame(animate);
+  pivot.rotation.x += (mouseTargetX - pivot.rotation.x) * 0.045;
+  pivot.rotation.y += (mouseTargetY - pivot.rotation.y) * 0.045;
+  renderer.render(scene, camera);
+})();
+</script>
+</body>
+</html>
