@@ -16,14 +16,11 @@
 
     <style>
         @font-face {
-            font-family: 'Reckless';
-            src: url('assets/Reckless-SemiBold.otf') format('opentype');
-            font-weight: 600;
-        }
-        @font-face {
-            font-family: 'Marund';
-            src: url('assets/Marund-7022Curved.otf') format('opentype');
-            font-weight: normal;
+            font-family: 'Uncut Sans';
+            src: url('assets/Uncut Sans/Webfonts/UncutSans-Variable.woff2') format('woff2');
+            font-weight: 300 800;
+            font-style: normal;
+            font-display: swap;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,8 +31,14 @@
             color: #111111;
             margin: 0; padding: 0;
             overflow: hidden;
-            font-family: 'Marund', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
+            font-weight: 700;
         }
+        body * {
+            font-family: 'Uncut Sans', sans-serif !important;
+            font-weight: 700 !important;
+        }
+        button, input, textarea, select, a { font-family: inherit; font-weight: inherit; }
 
         main { height: 100vh; display: flex; flex-direction: column; overflow: hidden; }
         .gallery-section { flex: 1; min-height: 0; overflow: hidden; display: flex; flex-direction: column; }
@@ -84,7 +87,7 @@
             pointer-events: auto;
         }
         #welcome-ui h1 {
-            font-family: 'Marund', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             color: #0011FF;
             font-size: clamp(44px, 7.8vw, 112px);
             line-height: 0.88;
@@ -92,7 +95,7 @@
             margin: 0 0 28px;
         }
         #welcome-socials {
-            font-family: 'Reckless', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 14px;
             color: #111;
             margin: 0 0 36px;
@@ -109,7 +112,7 @@
             gap: 8px;
             background: #111;
             color: #fff;
-            font-family: 'Reckless', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 14px;
             border: none;
             border-radius: 4px;
@@ -122,7 +125,7 @@
         #enter-sound:hover { background: #000; }
         #enter-silent {
             display: block;
-            font-family: 'Reckless', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 13px;
             color: #666;
             background: none;
@@ -150,7 +153,7 @@
             white-space: nowrap;
         }
         .social-pill {
-            font-family: 'Reckless', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 13px;
             color: #111;
             border: 1.5px solid #bbb;
@@ -220,13 +223,13 @@
         /* Card hover overlays */
         .card-num {
             position: absolute; top: 12px; left: 14px;
-            font-family: 'Reckless', sans-serif; font-size: 11px; letter-spacing: 0.06em;
+            font-family: 'Uncut Sans', sans-serif; font-size: 11px; letter-spacing: 0.06em;
             color: rgba(0,0,0,0.55);
             opacity: 0; transition: opacity 0.22s ease; pointer-events: none;
         }
         .card-brief {
             position: absolute; bottom: 14px; left: 14px; right: 14px;
-            font-family: 'Reckless', sans-serif; font-size: 12px; line-height: 1.45;
+            font-family: 'Uncut Sans', sans-serif; font-size: 12px; line-height: 1.45;
             color: rgba(0,0,0,0.6);
             opacity: 0; transition: opacity 0.22s ease; pointer-events: none;
         }
@@ -243,15 +246,23 @@
             transition: opacity 0.28s ease;
         }
         #modal-backdrop.is-open { opacity: 1; pointer-events: auto; }
-        #modal-card {
+        #modal-card,
+        #page-modal {
             background: #ffffff;
             border-radius: 20px 20px 0 0;
-            width: min(560px, 100vw);
+            width: min(max(65vw, 560px), 100vw);
             height: calc(100vh - 248px);
             overflow: hidden; display: flex; flex-direction: column;
             box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
             transform: translateY(100%);
             transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
+        }
+        @media (max-width: 768px) {
+            #modal-card,
+            #page-modal {
+                width: 100vw;
+                height: calc(100vh - 160px);
+            }
         }
         #modal-backdrop.is-open #modal-card { transform: translateY(0); }
         #modal-img-area {
@@ -261,7 +272,7 @@
         #modal-img-area .ph-modal { width: 100%; height: 100%; display: block; }
         #modal-counter {
             position: absolute; top: 14px; left: 16px;
-            font-family: 'Reckless', sans-serif; font-size: 12px;
+            font-family: 'Uncut Sans', sans-serif; font-size: 12px;
             color: #fff; background: rgba(0,0,0,0.35);
             padding: 3px 8px; border-radius: 20px; letter-spacing: 0.04em;
         }
@@ -287,29 +298,29 @@
         #modal-close-btn:hover { background: #fff; border-color: #000; }
         #modal-body { padding: 24px 28px 32px; overflow-y: auto; flex: 1; min-height: 0; }
         #modal-title {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 26px; font-weight: 700;
             color: #111; margin: 0 0 14px; line-height: 1.2;
         }
         .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
         .modal-tag {
-            font-family: 'Reckless', sans-serif; font-size: 12px; color: #333;
+            font-family: 'Uncut Sans', sans-serif; font-size: 12px; color: #333;
             border: 1px solid #d0d0d0; border-radius: 20px; padding: 4px 12px;
             text-decoration: none; display: inline-flex; align-items: center;
         }
         .modal-tag-link {
-            font-family: 'Reckless', sans-serif; font-size: 12px; color: #fff;
+            font-family: 'Uncut Sans', sans-serif; font-size: 12px; color: #fff;
             background: #111; border: 1px solid #111; border-radius: 20px; padding: 4px 12px;
             text-decoration: none; display: inline-flex; align-items: center;
         }
         .modal-tag-link:hover { background: #333; border-color: #333; }
         #modal-divider { height: 1px; background: #ebebeb; margin: 0 0 18px; }
         #modal-desc {
-            font-family: 'Reckless', sans-serif; font-size: 14px;
+            font-family: 'Uncut Sans', sans-serif; font-size: 14px;
             color: #444; line-height: 1.7; margin: 0 0 16px;
         }
         #modal-url {
-            font-family: 'Reckless', sans-serif; font-size: 14px;
+            font-family: 'Uncut Sans', sans-serif; font-size: 14px;
             color: #0011FF; text-decoration: underline; text-underline-offset: 3px;
         }
         #modal-url:hover { opacity: 0.7; }
@@ -328,14 +339,6 @@
         #page-backdrop.is-open { opacity: 1; pointer-events: auto; }
         #page-modal {
             background: #fff;
-            border-radius: 20px 20px 0 0;
-            width: min(560px, 100vw);
-            height: calc(100vh - 248px);
-            overflow: hidden;
-            display: flex; flex-direction: column;
-            box-shadow: 0 -8px 40px rgba(0,0,0,0.12);
-            transform: translateY(100%);
-            transition: transform 0.38s cubic-bezier(0.32, 0.72, 0, 1);
             position: relative;
         }
         #page-backdrop.is-open #page-modal { transform: translateY(0); }
@@ -408,9 +411,9 @@
          ════════════════════════════════ -->
     <aside id="contact-panel" aria-label="Contact">
         <div style="text-align:right; margin-bottom:24px;">
-            <button id="close-contact" style="font-family:'Marund',sans-serif; font-size:12px; letter-spacing:0.06em; color:#fff; background:none; border:none; cursor:pointer; padding:0;">Close</button>
+            <button id="close-contact" style="font-family:'Uncut Sans',sans-serif; font-size:12px; letter-spacing:0.06em; color:#fff; background:none; border:none; cursor:pointer; padding:0;">Close</button>
         </div>
-        <nav style="font-family:'Marund',sans-serif; font-size:13px; line-height:2.15; text-align:right;">
+        <nav style="font-family:'Uncut Sans',sans-serif; font-size:13px; line-height:2.15; text-align:right;">
             <a href="mailto:work@ismailahmad.com" style="display:block; color:#fff; text-decoration:none;">work@ismailahmad.com</a>
             <a href="https://linkedin.com/in/ismxil" target="_blank" rel="noopener" style="display:block; color:#fff; text-decoration:none;">LinkedIn</a>
             <a href="https://x.com/ismxilahmad" target="_blank" rel="noopener" style="display:block; color:#fff; text-decoration:none;">X / Twitter</a>
@@ -419,7 +422,7 @@
         </nav>
         <div style="display:flex; align-items:center; gap:14px; margin-top:36px;">
             <img src="assets/ism.JPG" alt="Ismail Ahmad" style="width:50px; height:50px; border-radius:50%; object-fit:cover; object-position:top; flex-shrink:0;">
-            <p style="font-family:'Reckless',sans-serif; font-size:17px; line-height:1.25; color:#fff; margin:0;">Let's grab a<br>virtual coffee?</p>
+            <p style="font-family:'Uncut Sans',sans-serif; font-size:17px; line-height:1.25; color:#fff; margin:0;">Let's grab a<br>virtual coffee?</p>
         </div>
     </aside>
 
@@ -427,12 +430,12 @@
          Top Navigation
          ════════════════════════════════ -->
     <header id="top-nav" style="position:fixed; top:0; left:0; right:0; z-index:40; padding:18px 28px; background:rgba(255,255,255,0.96); backdrop-filter:blur(6px); display:flex; align-items:center; justify-content:space-between;">
-        <nav style="font-family:'Marund',sans-serif; font-size:13px; color:#111111;">
+        <nav style="font-family:'Uncut Sans',sans-serif; font-size:13px; color:#111111;">
             <a href="index.html" style="color:#111111; text-decoration:none; font-weight:600;">Index</a><span style="color:#888;">,</span>
             <a href="about.html" data-page style="color:#888; text-decoration:none; margin-left:6px;">About</a><span style="color:#888;">,</span>
             <a href="thought.html" data-page style="color:#888; text-decoration:none; margin-left:6px;">Blog</a>
         </nav>
-        <button id="open-contact" style="font-family:'Marund',sans-serif; font-size:13px; color:#111111; background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;">Contact <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></button>
+        <button id="open-contact" style="font-family:'Uncut Sans',sans-serif; font-size:13px; color:#111111; background:none; border:none; cursor:pointer; padding:0; display:flex; align-items:center; gap:4px;">Contact <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><path d="M7 17L17 7M17 7H7M17 7v10"/></svg></button>
     </header>
 
     <!-- ════════════════════════════════
@@ -441,8 +444,8 @@
     <main>
 
         <section style="padding:68px 20px 0; text-align:center; flex-shrink:0;">
-            <h1 style="font-family:'Marund',sans-serif; color:#0011FF; font-size:clamp(50px,8.2vw,118px); line-height:0.88; letter-spacing:-0.01em; margin:0 0 18px;">Ismail Ahmad&#174;<br>PORTFOLIO 2026</h1>
-            <p style="font-family:'Reckless',sans-serif; font-size:clamp(13px,1.1vw,16px); font-weight:700; color:#111; line-height:1.5; margin:0 auto 28px; max-width:360px;">Cross-platform work. International brands.<br>Experiences recognised by the industry's<br>leading design awards.</p>
+            <h1 style="font-family:'Uncut Sans',sans-serif; color:#0011FF; font-size:clamp(50px,8.2vw,118px); line-height:0.88; letter-spacing:-0.01em; margin:0 0 18px;">Ismail Ahmad&#174;<br>PORTFOLIO 2026</h1>
+            <p style="font-family:'Uncut Sans',sans-serif; font-size:clamp(13px,1.1vw,16px); font-weight:700; color:#111; line-height:1.5; margin:0 auto 28px; max-width:360px;">Cross-platform work. International brands.<br>Experiences recognised by the industry's<br>leading design awards.</p>
         </section>
 
 

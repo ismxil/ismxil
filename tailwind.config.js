@@ -9,9 +9,9 @@ tailwind.config = {
                 }
             },
             fontFamily: {
-                serif: ['"Midnight Sans Regular"', 'sans-serif'],
-                display: ['"Midnight Sans Bold"', 'sans-serif'],
-                mono: ['"Space Mono"', 'monospace'],
+                serif: ['"Uncut Sans"', '"Midnight Sans Regular"', 'sans-serif'],
+                display: ['"Uncut Sans"', '"Midnight Sans Bold"', 'sans-serif'],
+                mono: ['"Uncut Sans"', 'sans-serif'],
             }
         }
     }

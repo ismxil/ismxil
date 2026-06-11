@@ -6,14 +6,11 @@
     <title>Blog | Ismail Ahmad</title>
     <style>
         @font-face {
-            font-family: 'Reckless';
-            src: url('assets/Reckless-SemiBold.otf') format('opentype');
-            font-weight: 600;
-        }
-        @font-face {
-            font-family: 'Marund';
-            src: url('assets/Marund-7022Curved.otf') format('opentype');
-            font-weight: normal;
+            font-family: 'Uncut Sans';
+            src: url('assets/Uncut Sans/Webfonts/UncutSans-Variable.woff2') format('woff2');
+            font-weight: 300 800;
+            font-style: normal;
+            font-display: swap;
         }
 
         *, *::before, *::after { box-sizing: border-box; }
@@ -26,13 +23,19 @@
         }
 
         body {
-            font-family: 'Reckless', -apple-system, BlinkMacSystemFont, sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
+            font-weight: 700;
             font-size: 14px;
             line-height: 1.7;
             overflow-y: auto;
             overflow-x: hidden;
             border-radius: 20px 20px 0 0;
         }
+        body * {
+            font-family: 'Uncut Sans', sans-serif !important;
+            font-weight: 700 !important;
+        }
+        button, input, textarea, select, a { font-family: inherit; font-weight: inherit; }
 
         .handle-bar {
             width: 36px;
@@ -49,7 +52,7 @@
         }
 
         h1 {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 26px;
             font-weight: 700;
             color: #111;
@@ -78,7 +81,7 @@
         .article-item:last-child { border-bottom: none; }
 
         .article-year {
-            font-family: 'SF Mono', 'Fira Mono', monospace;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 12px;
             color: #aaa;
             width: 36px;
@@ -87,7 +90,7 @@
         }
 
         .article-title {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+            font-family: 'Uncut Sans', sans-serif;
             font-size: 15px;
             font-weight: 600;
             color: #111;
