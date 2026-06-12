@@ -183,6 +183,100 @@
         #play-btn:hover,
         #open-contact:hover { background: #0022ee; }
         #play-btn svg { display: block; }
+        #music-popover {
+            position: absolute;
+            right: 0;
+            bottom: 54px;
+            width: min(360px, calc(100vw - 32px));
+            padding: 22px;
+            border-radius: 28px;
+            background: #0011FF;
+            color: #fff;
+            box-shadow: 0 18px 50px rgba(0,17,255,0.24);
+            opacity: 0;
+            transform: translateY(14px) scale(0.98);
+            transform-origin: right bottom;
+            pointer-events: none;
+            transition: opacity 0.22s ease, transform 0.22s ease;
+        }
+        #bottom-bar:hover #music-popover,
+        #bottom-bar:focus-within #music-popover,
+        #music-popover.is-visible {
+            opacity: 1;
+            transform: translateY(0) scale(1);
+            pointer-events: auto;
+        }
+        .music-track {
+            display: grid;
+            grid-template-columns: 48px 1fr 42px;
+            gap: 14px;
+            align-items: center;
+            margin-bottom: 18px;
+        }
+        .music-track:last-of-type { margin-bottom: 22px; }
+        .music-cover,
+        .music-current-cover {
+            border-radius: 12px;
+            background:
+                radial-gradient(circle at 70% 25%, rgba(255,255,255,0.42), transparent 24%),
+                linear-gradient(135deg, #0b163f, #4220c8 52%, #ff5c9f);
+            box-shadow: inset 0 0 0 1px rgba(255,255,255,0.12);
+        }
+        .music-cover { width: 48px; height: 48px; }
+        .music-title {
+            font-size: 20px;
+            line-height: 1.05;
+            margin: 0 0 4px;
+            color: #fff;
+        }
+        .music-artist {
+            font-size: 13px;
+            line-height: 1.1;
+            margin: 0;
+            color: rgba(255,255,255,0.62);
+        }
+        .music-row-btn {
+            width: 42px;
+            height: 42px;
+            border: none;
+            border-radius: 50%;
+            background: rgba(0,0,0,0.18);
+            color: #fff;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            pointer-events: none;
+        }
+        .music-now {
+            border-top: 1px solid rgba(0,0,0,0.12);
+            padding-top: 20px;
+            text-align: center;
+        }
+        .music-current-cover {
+            width: 92px;
+            height: 92px;
+            border-radius: 50%;
+            margin: 0 auto 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .music-current-title {
+            margin: 0;
+            font-size: 24px;
+            line-height: 1.1;
+            color: #fff;
+        }
+        .music-current-subtitle {
+            margin: 4px 0 0;
+            font-size: 15px;
+            color: rgba(255,255,255,0.52);
+        }
+        .music-hint {
+            margin: 14px 0 0;
+            font-size: 11px;
+            color: rgba(255,255,255,0.46);
+        }
         #open-contact {
             color: #fff;
             width: auto;
@@ -273,29 +367,44 @@
             position: relative;
             width: 100%;
             height: 100%;
+            color: #0011ff;
+            transform-style: preserve-3d;
+            transition: transform 0.42s cubic-bezier(0.2, 0.72, 0.16, 1), box-shadow 0.42s ease;
+            cursor: pointer;
+        }
+        .contact-card:hover {
+            transform: rotateX(9deg) rotateY(-12deg) translateY(-8px);
+        }
+        #contact-panel.is-flipped .contact-card {
+            transform: rotateY(180deg);
+        }
+        #contact-panel.is-flipped .contact-card:hover {
+            transform: rotateY(180deg) rotateX(9deg) translateY(-8px);
+        }
+        .contact-face {
+            position: absolute;
+            inset: 0;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: clamp(18px, 2.6vw, 26px);
             border-radius: 20px;
-            color: #0011ff;
             background:
                 radial-gradient(circle at 18% 14%, rgba(255,255,255,0.42), transparent 30%),
                 linear-gradient(135deg, #e7e5db 0%, #d8d6cb 100%);
             box-shadow:
                 12px 28px 28px rgba(0,0,0,0.25),
                 0 44px 90px rgba(0,0,0,0.2);
-            transform-style: preserve-3d;
-            transition: transform 0.42s cubic-bezier(0.2, 0.72, 0.16, 1), box-shadow 0.42s ease;
+            backface-visibility: hidden;
+            -webkit-backface-visibility: hidden;
             overflow: hidden;
         }
-        .contact-card:hover {
-            transform: rotateX(9deg) rotateY(-12deg) translateY(-8px);
+        .contact-card:hover .contact-face {
             box-shadow:
                 18px 38px 36px rgba(0,0,0,0.28),
                 0 60px 110px rgba(0,0,0,0.24);
         }
-        .contact-card::before {
+        .contact-face::before {
             content: "";
             position: absolute;
             inset: 0;
@@ -306,17 +415,33 @@
             opacity: 0.55;
             pointer-events: none;
         }
-        .contact-card > * {
+        .contact-front {
+            transform: rotateY(0deg);
+        }
+        .contact-back {
+            align-items: center;
+            justify-content: center;
+            transform: rotateY(180deg);
+        }
+        .contact-logo-mark {
+            position: relative;
+            z-index: 1;
+            width: clamp(92px, 12vw, 148px);
+            height: clamp(92px, 12vw, 148px);
+            transform: translateZ(22px) rotateX(8deg) rotateY(-10deg);
+            pointer-events: none;
+        }
+        .contact-front > * {
             position: relative;
             z-index: 1;
             opacity: 0;
             transform: translateY(8px);
         }
-        #contact-panel.is-open .contact-card > * {
+        #contact-panel.is-open .contact-front > * {
             animation: contactStagger 0.62s cubic-bezier(0.2, 0.72, 0.16, 1) forwards;
         }
-        #contact-panel.is-open .contact-card > *:nth-child(1) { animation-delay: 0.08s; }
-        #contact-panel.is-open .contact-card > *:nth-child(2) { animation-delay: 0.18s; }
+        #contact-panel.is-open .contact-front > *:nth-child(1) { animation-delay: 0.08s; }
+        #contact-panel.is-open .contact-front > *:nth-child(2) { animation-delay: 0.18s; }
         .contact-card-top,
         .contact-card-bottom {
             display: grid;
@@ -358,12 +483,14 @@
             align-items: center;
             gap: 13px;
         }
+        .contact-socials a {
+            display: inline-flex;
+            color: #0011ff;
+        }
         .contact-socials svg {
             width: 26px;
             height: 26px;
             display: block;
-            fill: #0011ff;
-            stroke: #0011ff;
         }
         @keyframes contactStagger {
             to { opacity: 1; transform: translateY(0); }
@@ -413,7 +540,6 @@
             flex-shrink: 0;
             overflow: visible;
             cursor: pointer;
-            height: 68%;
             width: max(345px, calc((100vw - 144px) / 5));
             min-width: 345px;
             min-height: 345px;
@@ -424,11 +550,10 @@
             padding-top: 34px;
             padding-bottom: 60px;
         }
-        .g-item[data-index="3"] { height: 46%; }
-        .g-item img { display: block; width: 100%; flex: 1; min-height: 0; object-fit: cover; pointer-events: none; }
+        .g-item img { display: block; width: 100%; height: var(--cover-height, 345px); max-height: 460px; object-fit: cover; pointer-events: none; }
         .g-item img,
         .g-item .ph { order: 2; }
-        .g-item .ph { display: block; width: 100%; flex: 1; min-height: 0; background: #e3e3e3; }
+        .g-item .ph { display: block; width: 100%; height: var(--cover-height, 345px); max-height: 460px; background: #e3e3e3; }
         .g-item .ph,
         #modal-img-placeholder {
             display: flex;
@@ -473,6 +598,8 @@
         @media (max-width: 720px) {
             .gallery-inner { padding-left: 24px; padding-right: 24px; }
             .g-item { width: min(78vw, 345px); min-width: min(78vw, 345px); }
+            .g-item img,
+            .g-item .ph { height: min(78vw, var(--cover-height, 345px)); }
             .card-num,
             .card-brief { font-size: 18px; }
         }
@@ -699,6 +826,44 @@
         <a class="social-pill" href="https://github.com/ismxil" target="_blank" rel="noopener">Github</a>
         <a class="social-pill" href="https://x.com/ismxilahmad" target="_blank" rel="noopener">X</a>
         <a class="social-pill" href="https://instagram.com/ismxilahmad" target="_blank" rel="noopener">Instagram</a>
+        <div id="music-popover" aria-hidden="true">
+            <div class="music-track">
+                <div class="music-cover"></div>
+                <div>
+                    <p class="music-title">Dream</p>
+                    <p class="music-artist">Alan Watts</p>
+                </div>
+                <div class="music-row-btn" aria-hidden="true">
+                    <svg class="music-row-pause" width="13" height="16" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="4" width="5" height="16" rx="2"/><rect x="14" y="4" width="5" height="16" rx="2"/></svg>
+                    <svg class="music-row-play" width="14" height="16" viewBox="0 0 24 24" fill="currentColor" style="display:none"><polygon points="7,4 20,12 7,20"/></svg>
+                </div>
+            </div>
+            <div class="music-track">
+                <div class="music-cover"></div>
+                <div>
+                    <p class="music-title">Beautiful Errors</p>
+                    <p class="music-artist">Alan Watts</p>
+                </div>
+                <div class="music-row-btn" aria-hidden="true"><svg width="14" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="7,4 20,12 7,20"/></svg></div>
+            </div>
+            <div class="music-track">
+                <div class="music-cover"></div>
+                <div>
+                    <p class="music-title">Night Moves</p>
+                    <p class="music-artist">Apollo Brown</p>
+                </div>
+                <div class="music-row-btn" aria-hidden="true"><svg width="14" height="16" viewBox="0 0 24 24" fill="currentColor"><polygon points="7,4 20,12 7,20"/></svg></div>
+            </div>
+            <div class="music-now">
+                <div class="music-current-cover">
+                    <svg id="music-current-icon-play" width="24" height="28" viewBox="0 0 24 24" fill="white"><polygon points="7,4 20,12 7,20"/></svg>
+                    <svg id="music-current-icon-pause" width="26" height="28" viewBox="0 0 24 24" fill="white" style="display:none"><rect x="5" y="4" width="5" height="16" rx="2"/><rect x="14" y="4" width="5" height="16" rx="2"/></svg>
+                </div>
+                <p class="music-current-title">Alan Watts</p>
+                <p class="music-current-subtitle" id="music-current-track">Dream</p>
+                <p class="music-hint" id="music-hint">Choose Enter With Sound To Enable Music</p>
+            </div>
+        </div>
         <button id="play-btn" aria-label="Play / Pause music">
             <svg id="icon-play" width="14" height="14" viewBox="0 0 24 24" fill="white"><polygon points="6,3 20,12 6,21"/></svg>
             <svg id="icon-pause" width="14" height="14" viewBox="0 0 24 24" fill="white" style="display:none"><rect x="5" y="4" width="4" height="16"/><rect x="15" y="4" width="4" height="16"/></svg>
@@ -716,30 +881,35 @@
     <aside id="contact-panel" aria-label="Contact" aria-hidden="true">
         <button id="close-contact" type="button">Close</button>
         <div class="contact-scene">
-            <div class="contact-card">
-                <div class="contact-card-top">
-                    <div class="contact-name">Ismail<br>Ahmad</div>
-                    <div class="contact-description">Designing Services, Web, Product, Brand For Financial Institutions</div>
+            <div class="contact-card" role="button" tabindex="0" aria-label="Flip Contact Card">
+                <div class="contact-face contact-front">
+                    <div class="contact-card-top">
+                        <div class="contact-name">Ismail<br>Ahmad</div>
+                        <div class="contact-description">Designing Services, Web, Product, Brand For Financial Institutions</div>
+                    </div>
+                    <div class="contact-card-bottom">
+                        <div class="contact-links">
+                            <a href="mailto:info@ismailahmad.com">Info@IsmailAhmad.Com</a><br>
+                            <a href="https://ismailahmad.com">IsmailAhmad.Com</a>
+                        </div>
+                        <div class="contact-socials" aria-label="Social Links">
+                            <a href="https://linkedin.com/in/ismxil" target="_blank" rel="noopener" aria-label="Linkedin">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.28 8.1h4.43V23H.28V8.1ZM7.6 8.1h4.25v2.04h.06c.59-1.12 2.04-2.3 4.2-2.3 4.49 0 5.32 2.96 5.32 6.8V23H17v-7.42c0-1.77-.03-4.05-2.47-4.05-2.48 0-2.86 1.93-2.86 3.92V23H7.6V8.1Z"/></svg>
+                            </a>
+                            <a href="https://dribbble.com/ismxil" target="_blank" rel="noopener" aria-label="Dribbble">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="9.4"/><path d="M4.1 7.3c3.4 2.1 8.7 2.6 15.5.1"/><path d="M8.1 21.1c1.3-5.7 5.1-9.4 13.2-9.8"/><path d="M8.2 3.2c3.6 4.2 5.6 9.5 6.5 17.4"/></svg>
+                            </a>
+                            <a href="https://github.com/ismxil" target="_blank" rel="noopener" aria-label="Github">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="currentColor"><path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.76-.24.76-.54v-2.1c-3.1.67-3.75-1.32-3.75-1.32-.5-1.28-1.24-1.62-1.24-1.62-1.02-.7.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15 1 .1 2.61.4 3.25-.3.1-.73.39-1.22.7-1.5-2.47-.28-5.08-1.24-5.08-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.15a10.6 10.6 0 0 1 5.6 0c2.14-1.45 3.08-1.15 3.08-1.15.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3 0 4.29-2.61 5.23-5.1 5.51.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.77.54A11.2 11.2 0 0 0 12 .8Z"/></svg>
+                            </a>
+                            <a href="https://instagram.com/ismxilahmad" target="_blank" rel="noopener" aria-label="Instagram">
+                                <svg viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"><rect x="3.2" y="3.2" width="17.6" height="17.6" rx="5"/><circle cx="12" cy="12" r="4.2"/><circle cx="17.2" cy="6.8" r="1.1" fill="currentColor" stroke="none"/></svg>
+                            </a>
+                        </div>
+                    </div>
                 </div>
-                <div class="contact-card-bottom">
-                    <div class="contact-links">
-                        <a href="mailto:info@ismailahmad.com">Info@IsmailAhmad.Com</a><br>
-                        <a href="https://ismailahmad.com">IsmailAhmad.Com</a>
-                    </div>
-                    <div class="contact-socials" aria-label="Social Links">
-                        <a href="https://linkedin.com/in/ismxil" target="_blank" rel="noopener" aria-label="Linkedin">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4.98 3.5C4.98 4.88 3.86 6 2.5 6S0 4.88 0 3.5 1.12 1 2.5 1s2.48 1.12 2.48 2.5ZM.28 8.1h4.43V23H.28V8.1ZM7.6 8.1h4.25v2.04h.06c.59-1.12 2.04-2.3 4.2-2.3 4.49 0 5.32 2.96 5.32 6.8V23H17v-7.42c0-1.77-.03-4.05-2.47-4.05-2.48 0-2.86 1.93-2.86 3.92V23H7.6V8.1Z"/></svg>
-                        </a>
-                        <a href="https://dribbble.com/ismxil" target="_blank" rel="noopener" aria-label="Dribbble">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"><circle cx="12" cy="12" r="10" stroke-width="2.2"/><path d="M4 8.2c3.7 2.2 8.4 2.5 15.7.2M8.2 21c1.4-5.7 5-9.4 13.5-9.7M8.1 3.2c3.5 4.2 5.5 9.4 6.4 17.4" stroke-width="2.2" fill="none"/></svg>
-                        </a>
-                        <a href="https://github.com/ismxil" target="_blank" rel="noopener" aria-label="Github">
-                            <svg viewBox="0 0 24 24" aria-hidden="true"><path d="M12 .8a11.2 11.2 0 0 0-3.54 21.83c.56.1.76-.24.76-.54v-2.1c-3.1.67-3.75-1.32-3.75-1.32-.5-1.28-1.24-1.62-1.24-1.62-1.02-.7.08-.68.08-.68 1.12.08 1.71 1.15 1.71 1.15 1 .1 2.61.4 3.25-.3.1-.73.39-1.22.7-1.5-2.47-.28-5.08-1.24-5.08-5.52 0-1.22.44-2.22 1.15-3-.12-.28-.5-1.42.11-2.96 0 0 .94-.3 3.08 1.15a10.6 10.6 0 0 1 5.6 0c2.14-1.45 3.08-1.15 3.08-1.15.61 1.54.23 2.68.11 2.96.72.78 1.15 1.78 1.15 3 0 4.29-2.61 5.23-5.1 5.51.4.35.76 1.03.76 2.08v3.08c0 .3.2.65.77.54A11.2 11.2 0 0 0 12 .8Z"/></svg>
-                        </a>
-                        <a href="https://instagram.com/ismxilahmad" target="_blank" rel="noopener" aria-label="Instagram">
-                            <svg viewBox="0 0 24 24" aria-hidden="true" fill="none"><rect x="3" y="3" width="18" height="18" rx="5" stroke-width="2.2"/><circle cx="12" cy="12" r="4" stroke-width="2.2"/><circle cx="17.5" cy="6.5" r="1.3" fill="#0011ff" stroke="none"/></svg>
-                        </a>
-                    </div>
+                <div class="contact-face contact-back" aria-hidden="true">
+                    <canvas id="contact-logo-c" class="contact-logo-mark" aria-hidden="true"></canvas>
                 </div>
             </div>
         </div>
@@ -770,13 +940,13 @@
         <section class="gallery-section">
             <div class="gallery-wrap" id="gallery-wrap">
                 <div class="gallery-inner">
-                    <div class="g-item" data-index="0" style="margin-top:32px;"><img src="assets/lemfi.png" alt="Lemfi project preview"></div>
-                    <div class="g-item" data-index="1" style="margin-top:8px;"><img src="assets/mezovest.png" alt="Mezovest project preview"></div>
-                    <div class="g-item" data-index="2" style="margin-top:0;"><img src="assets/cadana.png" alt="Cadana project preview"></div>
-                    <div class="g-item" data-index="3" style="margin-top:100px;"><img src="assets/motel-one.png" alt="Motel One project preview"></div>
-                    <div class="g-item" data-index="4" style="margin-top:16px;"><img src="assets/gomoney.png" alt="Gomoney project preview"></div>
-                    <div class="g-item" data-index="5" style="margin-top:24px;"><div class="ph" style="background:#d8d8d8;">Commerz Bank</div></div>
-                    <div class="g-item" data-index="6" style="margin-top:56px;"><img src="assets/ecb.png" alt="Etihad Credit Bureau project preview"></div>
+                    <div class="g-item" data-index="0" style="margin-top:32px; --cover-height:420px;"><img src="assets/lemfi.png" alt="Lemfi project preview"></div>
+                    <div class="g-item" data-index="1" style="margin-top:8px; --cover-height:360px;"><img src="assets/mezovest.png" alt="Mezovest project preview"></div>
+                    <div class="g-item" data-index="2" style="margin-top:0; --cover-height:460px;"><img src="assets/cadana.png" alt="Cadana project preview"></div>
+                    <div class="g-item" data-index="3" style="margin-top:100px; --cover-height:345px;"><img src="assets/motel-one.webp" alt="Motel One project preview"></div>
+                    <div class="g-item" data-index="4" style="margin-top:16px; --cover-height:395px;"><img src="assets/gomoney.png" alt="Gomoney project preview"></div>
+                    <div class="g-item" data-index="5" style="margin-top:24px; --cover-height:345px;"><img src="assets/commerze.png" alt="Commerz Bank project preview"></div>
+                    <div class="g-item" data-index="6" style="margin-top:56px; --cover-height:440px;"><img src="assets/ecb.png" alt="Etihad Credit Bureau project preview"></div>
                 </div>
             </div>
         </section>
@@ -1004,6 +1174,136 @@
         })();
 
         } // end if (!window._skipWelcome)
+
+        function initContactLogo3D() {
+            const canvas = document.getElementById('contact-logo-c');
+            if (!canvas) return;
+
+            const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: true });
+            renderer.setPixelRatio(Math.min(window.devicePixelRatio, 2));
+            renderer.setClearColor(0x000000, 0);
+            renderer.toneMapping = THREE.ACESFilmicToneMapping;
+            renderer.toneMappingExposure = 1.35;
+            renderer.outputColorSpace = THREE.SRGBColorSpace;
+
+            const scene = new THREE.Scene();
+            const camera = new THREE.PerspectiveCamera(38, 1, 0.1, 500);
+            camera.position.z = 82;
+
+            const pmrem = new THREE.PMREMGenerator(renderer);
+            scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+            pmrem.dispose();
+
+            scene.add(new THREE.AmbientLight(0xffffff, 0.82));
+            const keyLight = new THREE.DirectionalLight(0xffffff, 2.9);
+            keyLight.position.set(-22, 30, 34);
+            scene.add(keyLight);
+            const fillLight = new THREE.DirectionalLight(0x9fb1ff, 1.2);
+            fillLight.position.set(24, -16, 22);
+            scene.add(fillLight);
+            const rimLight = new THREE.DirectionalLight(0x0011ff, 1.6);
+            rimLight.position.set(0, 8, -36);
+            scene.add(rimLight);
+
+            const mat = new THREE.MeshPhysicalMaterial({
+                color: 0x0011ff,
+                metalness: 0.72,
+                roughness: 0.16,
+                envMapIntensity: 1.65,
+                clearcoat: 0.35,
+                clearcoatRoughness: 0.18,
+            });
+
+            const pivot = new THREE.Group();
+            scene.add(pivot);
+            const group = new THREE.Group();
+            pivot.add(group);
+
+            const CX = 19.8924, CY = 19.8924, DEPTH = 3.5;
+            const BEVEL = { depth: DEPTH, bevelEnabled: true, bevelThickness: 0.5, bevelSize: 0.35, bevelSegments: 4 };
+
+            const ring = new THREE.Mesh(new THREE.TorusGeometry(18.6475, 2.48974 / 2, 24, 120), mat);
+            ring.position.z = DEPTH / 2;
+            group.add(ring);
+
+            const thinLine = (() => {
+                const r = 2.48974 / 2;
+                const a = new THREE.Vector3(19.703 - CX, -(1.3706 - CY), 0);
+                const b = new THREE.Vector3(7.38959 - CX, -(33.6143 - CY), 0);
+                const dir = b.clone().sub(a);
+                const mid = a.clone().lerp(b, 0.5);
+                const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 20), mat);
+                m.position.set(mid.x, mid.y, DEPTH / 2);
+                m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+                group.add(m);
+                return m;
+            })();
+
+            const thickLine = (() => {
+                const r = 6.90648 / 2;
+                const a = new THREE.Vector3(18.6145 - CX, -(7.31771 - CY), 0);
+                const b = new THREE.Vector3(33.1972 - CX, -(32.5316 - CY), 0);
+                const dir = b.clone().sub(a);
+                const mid = a.clone().lerp(b, 0.5);
+                const m = new THREE.Mesh(new THREE.CylinderGeometry(r, r, dir.length(), 20), mat);
+                m.position.set(mid.x, mid.y, DEPTH / 2);
+                m.quaternion.setFromUnitVectors(new THREE.Vector3(0, 1, 0), dir.normalize());
+                group.add(m);
+                return m;
+            })();
+
+            const orbit = (() => {
+                const rx = (38.5398 - 1.24487) / 2;
+                const ry = (25.3316 - 14.4531) / 2;
+                class EllipseCurve extends THREE.Curve {
+                    getPoint(t, out) {
+                        const v = out || new THREE.Vector3();
+                        return v.set(rx * Math.cos(t * Math.PI * 2), ry * Math.sin(t * Math.PI * 2), 0);
+                    }
+                }
+                const m = new THREE.Mesh(new THREE.TubeGeometry(new EllipseCurve(), 120, 2.48974 / 2, 16, true), mat);
+                m.position.z = DEPTH / 2;
+                group.add(m);
+                return m;
+            })();
+
+            const star = (() => {
+                const pts = [[20.8605,30.2672],[22.5437,30.4788],[21.4593,32.1087],[21.7782,33.7749],[19.8929,33.2469],[18.4066,34.0652],[18.0076,33.7752],[18.3265,32.1089],[17.0891,30.948],[17.2421,30.4788],[18.9253,30.2672],[19.6464,28.7322],[20.1395,28.7322]];
+                const shape = new THREE.Shape(pts.map(([x, y]) => new THREE.Vector2(x - CX, -(y - CY))));
+                const m = new THREE.Mesh(new THREE.ExtrudeGeometry(shape, BEVEL), mat);
+                group.add(m);
+                return m;
+            })();
+
+            group.rotation.x = 0.16;
+            group.rotation.y = -0.36;
+            group.position.y = -1.5;
+            const pieces = [ring, thinLine, thickLine, orbit, star];
+            pieces.forEach((piece, index) => { piece.position.z += index === 4 ? 0.9 : 0; });
+
+            function resizeContactLogo() {
+                const rect = canvas.getBoundingClientRect();
+                const width = Math.max(1, Math.floor(rect.width));
+                const height = Math.max(1, Math.floor(rect.height));
+                renderer.setSize(width, height, false);
+                camera.aspect = width / height;
+                camera.updateProjectionMatrix();
+            }
+
+            if (window.ResizeObserver) {
+                new ResizeObserver(resizeContactLogo).observe(canvas);
+            }
+            resizeContactLogo();
+
+            (function animateContactLogo() {
+                requestAnimationFrame(animateContactLogo);
+                group.rotation.y += 0.008;
+                group.position.y = -1.5 + Math.sin(performance.now() * 0.0016) * 1.1;
+                renderer.render(scene, camera);
+            })();
+        }
+
+        initContactLogo3D();
     </script>
 
     <!-- ════════════════════════════════
@@ -1023,39 +1323,86 @@
         // e.g. youtube.com/watch?v=XXXXXXXXXXX → ID is 'XXXXXXXXXXX'
         // ────────────────────────────────
         var AW_TRACKS = [
-            'YbIMXQZMWdo',   // Alan Watts — The Real You (lofi beats)
-            'qhpCRnZRiXs',   // Alan Watts — Dream (with music)
-            'OPME6RBnVOs',   // Alan Watts — You Are It (ambient)
+            { id: 'qhpCRnZRiXs', title: 'Dream', artist: 'Alan Watts' },
+            { id: 'YbIMXQZMWdo', title: 'Beautiful Errors', artist: 'Alan Watts' },
+            { id: 'OPME6RBnVOs', title: 'Night Moves', artist: 'Apollo Brown' },
         ];
 
-        var ytFrame   = null;
-        var musicOn   = false;
+        var ytFrame = null;
+        var musicOn = false;
+        var musicEnabled = false;
+        var currentTrack = AW_TRACKS[0];
         var iconPause = document.getElementById('icon-pause');
         var iconPlay  = document.getElementById('icon-play');
+        var currentIconPause = document.getElementById('music-current-icon-pause');
+        var currentIconPlay = document.getElementById('music-current-icon-play');
+        var currentTrackLabel = document.getElementById('music-current-track');
+        var musicHint = document.getElementById('music-hint');
+        var musicPopover = document.getElementById('music-popover');
+        var audioCtx = null;
+        var lastWheelSound = 0;
+
+        function ensureAudio() {
+            if (!audioCtx) {
+                var Ctx = window.AudioContext || window.webkitAudioContext;
+                if (Ctx) audioCtx = new Ctx();
+            }
+            if (audioCtx && audioCtx.state === 'suspended') audioCtx.resume();
+            return audioCtx;
+        }
+
+        function playTone(type) {
+            var ctx = ensureAudio();
+            if (!ctx) return;
+            var now = ctx.currentTime;
+            var osc = ctx.createOscillator();
+            var gain = ctx.createGain();
+            osc.type = type === 'wheel' ? 'triangle' : 'sine';
+            osc.frequency.setValueAtTime(type === 'wheel' ? 160 : 440, now);
+            osc.frequency.exponentialRampToValueAtTime(type === 'wheel' ? 260 : 760, now + (type === 'wheel' ? 0.08 : 0.05));
+            gain.gain.setValueAtTime(0.0001, now);
+            gain.gain.exponentialRampToValueAtTime(type === 'wheel' ? 0.035 : 0.055, now + 0.01);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + (type === 'wheel' ? 0.11 : 0.075));
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.13);
+        }
 
         function updatePlayIcon() {
             iconPlay.style.display  = musicOn ? 'none'  : 'block';
             iconPause.style.display = musicOn ? 'block' : 'none';
+            currentIconPlay.style.display = musicOn ? 'none' : 'block';
+            currentIconPause.style.display = musicOn ? 'block' : 'none';
+            currentTrackLabel.textContent = currentTrack.title;
+            musicHint.textContent = musicEnabled ? (musicOn ? 'Playing' : 'Paused') : 'Choose Enter With Sound To Enable Music';
         }
 
         // Direct iframe + postMessage — no external API script needed
         function startMusic() {
-            var trackId = AW_TRACKS[Math.floor(Math.random() * AW_TRACKS.length)];
+            currentTrack = AW_TRACKS[Math.floor(Math.random() * AW_TRACKS.length)];
             var iframe = document.createElement('iframe');
             iframe.width  = '320';
             iframe.height = '180';
             iframe.allow  = 'autoplay; encrypted-media';
             iframe.setAttribute('frameborder', '0');
-            iframe.src = 'https://www.youtube.com/embed/' + trackId +
-                '?autoplay=1&controls=0&loop=1&playlist=' + trackId + '&enablejsapi=1';
+            iframe.src = 'https://www.youtube.com/embed/' + currentTrack.id +
+                '?autoplay=1&controls=0&loop=1&playlist=' + currentTrack.id + '&enablejsapi=1';
             document.getElementById('yt-player').appendChild(iframe);
             ytFrame = iframe;
+            musicEnabled = true;
             musicOn = true;
             updatePlayIcon();
         }
 
         function toggleMusic() {
-            if (!ytFrame) { startMusic(); return; }
+            playTone('click');
+            musicPopover.classList.add('is-visible');
+            setTimeout(function () { musicPopover.classList.remove('is-visible'); }, 1200);
+            if (!musicEnabled || !ytFrame) {
+                updatePlayIcon();
+                return;
+            }
             var cmd = musicOn ? 'pauseVideo' : 'playVideo';
             ytFrame.contentWindow.postMessage(
                 JSON.stringify({ event: 'command', func: cmd, args: [] }),
@@ -1066,15 +1413,24 @@
         }
 
         document.getElementById('play-btn').addEventListener('click', toggleMusic);
+        document.addEventListener('click', function (e) {
+            if (e.target.closest('#yt-wrap')) return;
+            if (e.target.closest('#play-btn, #enter-sound, #enter-silent')) return;
+            playTone('click');
+        }, true);
 
         // ── Enter with sound ──
         document.getElementById('enter-sound').addEventListener('click', function () {
+            ensureAudio();
+            playTone('click');
             startMusic();
             enterPortfolio();
         });
 
         // ── Enter without sound ──
         document.getElementById('enter-silent').addEventListener('click', function () {
+            ensureAudio();
+            playTone('click');
             enterPortfolio();
         });
 
@@ -1099,23 +1455,34 @@
         var panel   = document.getElementById('contact-panel');
         var openBtn = document.getElementById('open-contact');
         var closeBtn = document.getElementById('close-contact');
+        var contactCard = document.querySelector('.contact-card');
 
         function openContactPanel() {
             panel.classList.add('is-open');
             panel.setAttribute('aria-hidden', 'false');
         }
         function closeContactPanel() {
-            panel.classList.remove('is-open');
+            panel.classList.remove('is-open', 'is-flipped');
             panel.setAttribute('aria-hidden', 'true');
+        }
+
+        function toggleContactCard() {
+            panel.classList.toggle('is-flipped');
         }
 
         openBtn.addEventListener('click', openContactPanel);
         closeBtn.addEventListener('click', closeContactPanel);
-        document.addEventListener('click', function (e) {
-            if (panel.classList.contains('is-open') && e.target === panel)
-                closeContactPanel();
+        panel.addEventListener('click', function (e) {
+            if (!e.target.closest('.contact-card')) return;
+            if (e.target.closest('a')) return;
+            toggleContactCard();
         });
-
+        contactCard.addEventListener('keydown', function (e) {
+            if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault();
+                toggleContactCard();
+            }
+        });
         // ────────────────────────────────
         // Page modal (About, Blog, Work…)
         // ────────────────────────────────
@@ -1134,9 +1501,6 @@
         }
 
         document.getElementById('page-modal-close').addEventListener('click', closePageModal);
-        pageBackdrop.addEventListener('click', function (e) {
-            if (e.target === pageBackdrop) closePageModal();
-        });
 
         // Intercept nav links
         document.querySelectorAll('a[data-page]').forEach(function (a) {
@@ -1144,10 +1508,6 @@
                 e.preventDefault();
                 openPageModal(this.getAttribute('href'));
             });
-        });
-
-        document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') closePageModal();
         });
 
         // ────────────────────────────────
@@ -1373,7 +1733,6 @@
         function closeModal()    { backdrop.classList.remove('is-open'); document.body.style.overflow = ''; }
 
         modalClose.addEventListener('click', closeModal);
-        backdrop.addEventListener('click', function (e) { if (e.target === backdrop) closeModal(); });
         document.addEventListener('wheel', function (e) {
             if (!backdrop.classList.contains('is-open')) return;
             if (modalCard.contains(e.target)) {
@@ -1412,7 +1771,6 @@
         });
 
         document.addEventListener('keydown', function (e) {
-            if (e.key === 'Escape') { closeModal(); closeContactPanel(); }
             if (backdrop.classList.contains('is-open')) {
                 var currentImages = cards[currentIndex].images || [];
                 if (e.key === 'ArrowLeft' && currentImageIndex > 0) {
@@ -1476,6 +1834,11 @@
             window.addEventListener('wheel', function (e) {
                 if (backdrop.classList.contains('is-open')) return;
                 e.preventDefault();
+                var now = Date.now();
+                if (now - lastWheelSound > 90) {
+                    playTone('wheel');
+                    lastWheelSound = now;
+                }
                 pos = wrapPos(pos + e.deltaY + e.deltaX);
                 wrap.scrollLeft = pos;
             }, { passive: false });
