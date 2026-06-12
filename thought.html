@@ -107,6 +107,17 @@
             margin: 0;
             line-height: 1.5;
         }
+
+        .article-state {
+            color: #888;
+            font-size: 13px;
+            padding: 16px 0;
+        }
+
+        .article-state a {
+            color: #0011FF;
+            text-decoration: none;
+        }
     </style>
 </head>
 <body>
@@ -116,79 +127,70 @@
         <h1>Opinion</h1>
         <div class="divider"></div>
 
-        <ul class="article-list">
-            <li class="article-item">
-                <span class="article-year">2026</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=bees">Bees</a>
-                    <p class="article-desc">Why the best designers I know are like bees.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=fawning">Fawning.</a>
-                    <p class="article-desc">Mistaking fawning for effectiveness and culture fit.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=envy">Envy.</a>
-                    <p class="article-desc">Are my desires truly mine, or a reflection of someone else's?</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=affinity-is-free-at-what-cost">Affinity is "free", at what cost?</a>
-                    <p class="article-desc">Last year Canva acquired Affinity, a professional design tools alternative.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=therapy-is-funny">On therapy.</a>
-                    <p class="article-desc">Therapy is funny. I am left with more questions than answers.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=off-boarding-is-as-important-as-onboarding">Offboarding, in product.</a>
-                    <p class="article-desc">The risk, approach and what to look out for in your offboarding.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=why-are-we-doing-this">Product and souls.</a>
-                    <p class="article-desc">Why are products lacking soul.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2025</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=tune-out-the-ai-doomsayer-envagelist">AI panic.</a>
-                    <p class="article-desc">Enough of the doomsaying amplification, tune out and start focusing.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2024</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=my-yearly-retro-questions">20 questions for reflection.</a>
-                    <p class="article-desc">An avid follower of stoicism, Seneca had some influence on my reflections.</p>
-                </div>
-            </li>
-            <li class="article-item">
-                <span class="article-year">2024</span>
-                <div>
-                    <a class="article-title" href="article.html?slug=scrolljacking">Scrolljacking.</a>
-                    <p class="article-desc">It seems appealing, but can be deadly.</p>
-                </div>
-            </li>
+        <ul class="article-list" id="article-list">
+            <li class="article-state">Fetching latest essays from Substack...</li>
         </ul>
 
     </div>
+
+    <script src="blog-cache.js"></script>
+    <script>
+        (function () {
+            var list = document.getElementById('article-list');
+
+            function textOnly(value) {
+                var div = document.createElement('div');
+                div.innerHTML = value || '';
+                return (div.textContent || div.innerText || '').trim();
+            }
+
+            function renderArticles(articles) {
+                if (!articles || !articles.length) {
+                    showError();
+                    return;
+                }
+
+                list.innerHTML = '';
+                articles.forEach(function (article) {
+                    var item = document.createElement('li');
+                    item.className = 'article-item';
+
+                    var year = document.createElement('span');
+                    year.className = 'article-year';
+                    year.textContent = article.year || (article.pubDate ? new Date(article.pubDate).getFullYear() : '');
+
+                    var body = document.createElement('div');
+
+                    var title = document.createElement('a');
+                    title.className = 'article-title';
+                    title.href = 'article.html?slug=' + encodeURIComponent(article.slug);
+                    title.textContent = article.title;
+
+                    var desc = document.createElement('p');
+                    desc.className = 'article-desc';
+                    desc.textContent = textOnly(article.description);
+
+                    body.appendChild(title);
+                    if (desc.textContent) body.appendChild(desc);
+                    item.appendChild(year);
+                    item.appendChild(body);
+                    list.appendChild(item);
+                });
+            }
+
+            function showError() {
+                list.innerHTML = '<li class="article-state">Could not load Substack right now. <a href="https://wandarer.com" target="_blank" rel="noopener">Open Wandarer</a>.</li>';
+            }
+
+            if (!window.BlogCache) {
+                showError();
+                return;
+            }
+
+            BlogCache.getArticles(function (articles) {
+                renderArticles(articles);
+            });
+        })();
+    </script>
 </body>
 </html>
